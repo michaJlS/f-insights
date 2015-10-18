@@ -6,4 +6,5 @@ target
 /.project
 /.settings
 /RUNNING_PID
+/conf/dev.conf
 /project/project

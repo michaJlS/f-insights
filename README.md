@@ -1,4 +1,16 @@
-This is your new Play application
+Flickr Assistant
 =================================
+My Scala+Play Framework+Spark playground.
 
-This file will be packaged with your application, when using `activator dist`.
+Configuration
+==============
+
+dev.conf.sample
+https://www.flickr.com/services/apps/create/
+http://www.playframework.com/documentation/latest/ApplicationSecret
+
+Running
+========
+sbt "compile -Dconfig.resource=dev.conf"
+sbt "run -Dconfig.resource=dev.conf"
+

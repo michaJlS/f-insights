@@ -1,0 +1,9 @@
+include "application.conf"
+
+# See http://www.playframework.com/documentation/latest/ApplicationSecret for more details.
+play.crypto.secret = ""
+
+# You can create app and obtain key & secreat pair here:
+# https://www.flickr.com/services/apps/create/
+alerf.fa.app_key = ""
+alerf.fa.app_secret =  ""
