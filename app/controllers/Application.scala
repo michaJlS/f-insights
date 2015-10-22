@@ -8,7 +8,7 @@ class Application extends Controller with Base
 
   def index = Action { implicit request =>
    if (isLogged) {
-     Ok(views.html.index("Your new application is ready."))
+     Ok(views.html.index("Flickr Assistant."))
    } else {
      TemporaryRedirect(routes.Auth.login.absoluteURL)
    }
