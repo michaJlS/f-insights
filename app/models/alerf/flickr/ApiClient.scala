@@ -1,6 +1,6 @@
 package models.alerf.flickr
 
-import play.api.libs.json.JsValue
+import play.api.libs.json._
 import play.api.libs.oauth.{OAuthCalculator, RequestToken, ConsumerKey}
 import play.api.libs.ws.{WSResponse, WSRequest, WSClient}
 import play.api.Logger
@@ -36,14 +36,20 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey, req
     sign(prepareFunc(getRequest)).get
   }
 
+  private def log(r:WSResponse): WSResponse = {
+    Logger.info(r.body)
+    r
+  }
+
   private def setApiMethod(method:String)(request:WSRequest):WSRequest = {
     request.withQueryString("method" -> method)
   }
 
   private def setGetParams(params:Map[String, String])(request:WSRequest):WSRequest = {
-    params.head match {
-      case Tuple2(key, value) => setGetParams(params.tail)(request.withQueryString(key -> value))
-      case _ => request
+    if (params.isEmpty) {
+      request
+    } else {
+      setGetParams(params.tail)(request.withQueryString(params.head._1 -> params.head._2))
     }
   }
 
@@ -56,11 +62,11 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey, req
     // move to companion object?
     def parser(json:JsValue):Option[TokenInfo] = {
       for {
-        user <- json.\("oauth").\("user").toOption
-        nsid <- user.\("nsid").toOption
-        username <- user.\("username").toOption
-        fullname <- user.\("fullname").toOption
-      } yield TokenInfo(nsid.toString, username.toString, fullname.toString)
+        user <- (json \ "oauth" \ "user").toOption
+        nsid <- (user \ "nsid").asOpt[String]
+        username <- (user \ "username").asOpt[String]
+        fullname <- (user \ "fullname").asOpt[String]
+      } yield TokenInfo(nsid, username, fullname)
     }
     response.filter(isResponseOk).map(_.json).map(parser)
   }
@@ -69,9 +75,21 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey, req
     val h = setGetParams(Map("user_id" -> nsid)) _ compose setApiMethod("flickr.people.getInfo")
     val response = doRequest(h)
     def parser(json:JsValue):Option[UserInfo] = {
-      None
+      for {
+        person <- (json \ "person").toOption
+        id <- (person \ "id").asOpt[String]
+        nsid <- (person \ "nsid").asOpt[String]
+        username <- (person \ "username" \ "_content").asOpt[String]
+        fullname <- (person \ "realname" \ "_content").asOpt[String]
+        photosurl <- (person \ "photosurl" \ "_content").asOpt[String]
+        photos <- (person \ "photos").toOption
+        uploads <- (photos \ "count" \ "_content").asOpt[Int]
+        firstupload <- (photos \ "firstdate" \ "_content").asOpt[String]
+
+      } yield UserInfo(id, nsid, username, fullname, photosurl, uploads, firstupload)
     }
-    response.filter(isResponseOk).map(_.json).map(_ => None)
+    response.filter(isResponseOk).map(_.json).map(parser)
   }
+
 
 }
