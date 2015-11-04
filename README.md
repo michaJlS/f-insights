@@ -1,6 +1,13 @@
+Disclaimer
+===========
+This is my playground for learning Scala, Play framework, Spark and whatever else I will decide to include
+in this project in future.
+
+
 Flickr Assistant
 =================================
-My Scala+Play Framework+Spark playground.
+Set of tools which aims to help you to gain back the control over loads of photos which you miss on flickr but you 
+should see them and stuff like that. 
 
 Configuration
 ==============
