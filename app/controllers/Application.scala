@@ -30,7 +30,31 @@ class Application @Inject() (apiClient: WSClient) extends Controller with Base w
       val fApi = getFlickrApiClient
       val parser = new ResponseParser
 
-      fApi.checkToken.map(_.flatMap(parser.getTokenInfo(_)))
+    fApi.checkToken
+      .map(_ match {
+        case Some(json) => parser.getTokenInfo(json)
+        case _ => None
+      }).flatMap(_ match {
+        case Some(tokenInfo) => fApi.getUserPublicFavorites(nsid = tokenInfo.nsid, perpage =  10)
+        case _ => Future.successful(None)
+      }).map(_ match {
+        case Some(json) => (parser.getPhotosCollectionInfo(json), parser.getPhotos(json))
+        case _ => (None, None)
+      }).map(_ match {
+        case (Some(info), Some(photos)) => {
+          Ok(info.toString + "\n" + photos.map(" " + _.toString + "\n\n").fold("")(_ + _))
+        }
+        case (None, None) => InternalServerError("Buu1")
+        case (None, _) => InternalServerError("Buu2")
+        case (_, None) => InternalServerError("Buu3")
+      })
+
+
+
+
+
+
+//      fApi.checkToken.map(_.flatMap(parser.getTokenInfo(_)))
 
 //      fApi.checkToken.flatMap(res => res match {
 //        case Some(tokenInfo) => {
@@ -44,7 +68,6 @@ class Application @Inject() (apiClient: WSClient) extends Controller with Base w
 //      } )
 //    }
 
-    Future { Ok("ok") }
   } )
 
   private def getFlickrApiClient(implicit request:RequestHeader) = {

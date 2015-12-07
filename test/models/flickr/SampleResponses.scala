@@ -94,13 +94,12 @@ object SampleValidResponses
     """.stripMargin
 
   val favs =
-
     """
       |{ "photos": { "page": 100, "pages": "1253", "perpage": 3, "total": "3757",
       |    "photo": [
-      |      { "id": "20216912073", "owner": "94951940@N04", "secret": "1111111111", "server": "5686", "farm": 6, "title": "Mystic Morning", "ispublic": 1, "isfriend": 0, "isfamily": 0, "date_faved": "1441915873" },
-      |      { "id": "20647358024", "owner": "111325145@N07", "secret": "2222222222", "server": "752", "farm": 1, "title": "Wild flower meadow", "ispublic": 1, "isfriend": 0, "isfamily": 0, "date_faved": "1441834771" },
-      |      { "id": "16414481383", "owner": "30540702@N06", "secret": "3333333333", "server": "8685", "farm": 9, "title": "Foggy morning", "ispublic": 1, "isfriend": 0, "isfamily": 0, "date_faved": "1441834737" }
+      |      { "id": "20216912073", "owner": "94951940@N04", "secret": "1111111111", "server": "5686", "farm": 6, "title": "Mystic Morning", "ispublic": 1, "isfriend": 0, "isfamily": 0, "dateupload" : "1445281360", "datetaken" : "2015-10-18 12:35:06",  "date_faved": "1441915873", "media" : "photo" },
+      |      { "id": "20647358024", "owner": "111325145@N07", "secret": "2222222222", "server": "752", "farm": 1, "title": "Wild flower meadow", "ispublic": 1, "isfriend": 0, "isfamily": 0, "dateupload" : "1445281360", "datetaken" : "2015-10-18 12:35:06",  "date_faved": "1441834771", "media" : "photo" },
+      |      { "id": "16414481383", "owner": "30540702@N06", "secret": "3333333333", "server": "8685", "farm": 9, "title": "Foggy morning", "ispublic": 1, "isfriend": 0, "isfamily": 0, "dateupload" : "1445281360", "datetaken" : "2015-10-18 12:35:06",  "date_faved": "1441834737", "media" : "photo" }
       |    ] }, "stat": "ok" }
     """.stripMargin
 
@@ -206,6 +205,73 @@ object SampleInvalidResponses
       |    "photo": [
       |
       |    ] }, "stat": "ok" }
+    """.stripMargin
+
+  val emptyPhotosListObjInsteadArray =
+    """
+      |{ "photos": { "page": 1, "pages": 0, "perpage": 100,
+      |    "photo": {} }, "stat": "ok", "total": 2 }
+    """.stripMargin
+
+
+  val favsJustOneOk =
+    """
+      |{ "photos": { "page": 100, "pages": "1253", "perpage": 3, "total": "3757",
+      |    "photo": [
+      |      { "id": "20216912073", "owner": "94951940@N04", "secret": "1111111111", "server": "5686", "farm": 6, "title": "Mystic Morning", "ispublic": 1, "isfriend": 0, "isfamily": 0, "dateupload" : "1445281360", "datetaken" : "2015-10-18 12:35:06",  "date_faved": "1441915873", "media" : "photo" },
+      |      { "id": "20647358024", "secret": "2222222222", "server": "752", "farm": 1, "title": "Wild flower meadow", "ispublic": 1, "isfriend": 0, "isfamily": 0, "dateupload" : "1445281360", "datetaken" : "2015-10-18 12:35:06",  "date_faved": "1441834771", "media" : "photo" },
+      |      { "id": "16414481383", "owner": "30540702@N06", "secret": "3333333333", "server": "8685", "farm": 9, "title": "Foggy morning", "ispublic": 1, "isfriend": 0, "isfamily": 0, "dateupload" : "1445281360", "datetaken" : "2015-10-18 12:35:06",  "date_faved": "1441834737", "media" : "video" }
+      |    ] }, "stat": "ok" }
+    """.stripMargin
+
+  val photoExcerptMissingId =
+  """
+    |{
+    |      "owner" : "22786178@N02",
+    |      "server" : "667",
+    |      "farm" : 1,
+    |      "title" : "Autumn colours, Highlands, Scotland",
+    |      "ispublic" : 1,
+    |      "isfriend" : 0,
+    |      "isfamily" : 0,
+    |      "dateupload" : "1445281360",
+    |      "datetaken" : "2015-10-18 12:35:06",
+    |      "datetakengranularity" : "0",
+    |      "datetakenunknown" : "0",
+    |      "views" : "100",
+    |      "count_faves" : "6",
+    |      "count_comments" : "0",
+    |      "tags" : "",
+    |      "machine_tags" : "",
+    |      "date_faved" : "1445285360",
+    |      "media" : "photo",
+    |      "media_status" : "ready"
+    |    }
+  """.stripMargin
+
+  val photoExcerptMissingTitle =
+    """
+      |{
+      |      "id"     : "22284927996",
+      |      "owner" : "22786178@N02",
+      |      "server" : "667",
+      |      "farm" : 1,
+      |      "ispublic" : 1,
+      |      "isfriend" : 0,
+      |      "isfamily" : 0,
+      |      "dateupload" : "1445281360",
+      |      "datetaken" : "2015-10-18 12:35:06",
+      |      "datetakengranularity" : "0",
+      |      "datetakenunknown" : "0",
+      |      "views" : "100",
+      |      "count_faves" : "6",
+      |      "count_comments" : "0",
+      |      "tags" : "",
+      |      "machine_tags" : "",
+      |      "date_faved" : "1445285360",
+      |      "media" : "photo",
+      |      "media_status" : "ready"
+      |    }
     """.stripMargin
 
 

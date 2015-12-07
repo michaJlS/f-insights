@@ -23,7 +23,11 @@ class ResponseParserSpec extends Specification
   val validPersonInfo = Json.parse(SampleValidResponses.personInfo)
   val emptyPhotosList = Json.parse(SampleValidResponses.emptyPhotosList)
   val emptyPhotosListMissingTotal = Json.parse(SampleInvalidResponses.emptyPhotosListMissingTotal)
+  val emptyPhotosListObjInsteadArray = Json.parse(SampleInvalidResponses.emptyPhotosListObjInsteadArray)
   val favsPhotosList = Json.parse(SampleValidResponses.favs)
+  val photoExcerptMissingId = Json.parse(SampleInvalidResponses.photoExcerptMissingId)
+  val photoExcerptMissingTitle = Json.parse(SampleInvalidResponses.photoExcerptMissingTitle)
+  val favsJustOneOk = Json.parse(SampleInvalidResponses.favsJustOneOk)
 
 
   "ResponseParser#getTokenInfo()" should {
@@ -78,6 +82,55 @@ class ResponseParserSpec extends Specification
       }
       "a valid favs list" in {
         parser.getPhotosCollectionInfo(favsPhotosList) must beSome[CollectionInfo]
+      }
+    }
+  }
+
+  "ResponseParser#getPhotoExcerpt()" should {
+    "return None if provided json" in {
+      "is an empty string" in {
+        parser.getPhotoExcerpt(emptyString) must beNone
+      }
+      "is definitely different than it should be" in {
+        parser.getPhotoExcerpt(invalidJson) must beNone
+      }
+      "is almost ok but it is missing Id information" in {
+        parser.getPhotoExcerpt(photoExcerptMissingId) must beNone
+      }
+      "is almost ok but it is missing title information" in {
+        parser.getPhotoExcerpt(photoExcerptMissingTitle) must beNone
+      }
+    }
+  }
+
+  "ResponseParser#getPhotos()" should {
+    "return None if provided json" in {
+      "is an empty string" in {
+        parser.getPhotos(emptyString) must beNone
+      }
+      "is definitely different than it should be" in {
+        parser.getPhotos(invalidJson) must beNone
+      }
+      "object instead of array" in {
+        parser.getPhotos(emptyPhotosListObjInsteadArray) must beNone
+      }
+    }
+
+    "return Some with: " in {
+      "an empty list when there are no photos but provided json is ok" in {
+        val l = parser.getPhotos(emptyPhotosList)
+        l must beSome
+        l.get.length must beEqualTo(0)
+      }
+      "return list with all photos if all are ok" in {
+        val l = parser.getPhotos(favsPhotosList)
+        l must beSome
+        l.get.length must beEqualTo(3)
+      }
+      "returns list only with valid photos" in {
+        val l = parser.getPhotos(favsJustOneOk)
+        l must beSome
+        l.get.length must beEqualTo(1)
       }
     }
   }

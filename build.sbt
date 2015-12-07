@@ -4,7 +4,7 @@ version := "0.1"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.10.6"
 
 libraryDependencies ++= Seq(
   jdbc,

@@ -38,7 +38,7 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey, req
     r
   }
 
-  private def lognice(j:JsValue):JsValue = {
+  private def log(j:JsValue):JsValue = {
     Logger.info(Json.prettyPrint(j))
     j
   }
@@ -55,10 +55,20 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey, req
     }
   }
 
+  private def setOptionalParams(params:Map[String, Option[String]])(request:WSRequest):WSRequest = {
+    if (params.isEmpty) {
+      request
+    } else {
+      params.head._2 match {
+        case Some(v) => setOptionalParams(params.tail)(request.withQueryString(params.head._1 -> v))
+        case None => setOptionalParams(params.tail)(request)
+      }
+    }
+  }
+
   private def setHttpVerb(verb:String)(request:WSRequest):WSRequest = {
     request.withMethod(verb)
   }
-
 
   private def getJson(response:WSResponse):Option[JsValue] = {
     if (isResponseOk(response)) Some(response.json) else None
@@ -86,10 +96,10 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey, req
   def getUserPublicFavorites(nsid:String, page:Int=1, perpage:Int=500,
                              favedBefore:Option[String] = None,
                              favedAfter:Option[String] = None):Future[Option[JsValue]] = {
-    // TODO add before after
     val qp = Map("user_id" -> nsid, "page" -> page.toString, "per_page" -> perpage.toString,
-                  "extras" -> "date_upload,date_taken,tags,machine_tags,views,media,count_faves,count_comments")
-    val h = setQueryParams(qp) _ compose setApiMethod("flickr.favorites.getPublicList")
+                  "extras" -> "date_upload,date_taken,tags,machine_tags,views,media,count_faves,count_comments,url_q,url_m,url_z,url_l")
+    val optional = Map("min_fave_date" -> favedAfter, "max_fave_date" -> favedBefore)
+    val h = setQueryParams(qp) _ compose setApiMethod("flickr.favorites.getPublicList") _ compose setOptionalParams(optional)
     doRequest(h).map(getJson)
   }
 
