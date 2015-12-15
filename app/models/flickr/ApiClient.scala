@@ -10,7 +10,7 @@ import scala.concurrent.{Future, ExecutionContext}
 /**
  * First version. May require refactoring to a few more classes
  */
-class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey, requestToken: RequestToken, implicit val context:ExecutionContext)
+class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey, requestToken: RequestToken)
 {
 
   private val calculator = OAuthCalculator(consumerKey, requestToken)
@@ -29,7 +29,7 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey, req
     response.status > 199 && response.status < 300
   }
 
-  private def doRequest(prepareFunc: WSRequest => WSRequest):Future[WSResponse] = {
+  private def doRequest(prepareFunc: WSRequest => WSRequest)(implicit executor:ExecutionContext):Future[WSResponse] = {
     sign(prepareFunc(getRequest)).get
   }
 
@@ -70,16 +70,16 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey, req
     request.withMethod(verb)
   }
 
-  private def getJson(response:WSResponse):Option[JsValue] = {
+  private def getJson(response:WSResponse)(implicit executor:ExecutionContext):Option[JsValue] = {
     if (isResponseOk(response)) Some(response.json) else None
   }
 
-  def checkToken:Future[Option[JsValue]] = {
+  def checkToken()(implicit executor:ExecutionContext):Future[Option[JsValue]] = {
     val response = doRequest(setApiMethod("flickr.auth.oauth.checkToken"))
     response.map(getJson)
   }
 
-  def getUserInfo(nsid:String):Future[Option[JsValue]] = {
+  def getUserInfo(nsid:String)(implicit executor:ExecutionContext):Future[Option[JsValue]] = {
     val h = setQueryParams(Map("user_id" -> nsid)) _ compose setApiMethod("flickr.people.getInfo")
     doRequest(h).map(getJson)
   }
@@ -95,7 +95,7 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey, req
    */
   def getUserPublicFavorites(nsid:String, page:Int=1, perpage:Int=500,
                              favedBefore:Option[String] = None,
-                             favedAfter:Option[String] = None):Future[Option[JsValue]] = {
+                             favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[JsValue]] = {
     val qp = Map("user_id" -> nsid, "page" -> page.toString, "per_page" -> perpage.toString,
                   "extras" -> "date_upload,date_taken,tags,machine_tags,views,media,count_faves,count_comments,url_q,url_m,url_z,url_l")
     val optional = Map("min_fave_date" -> favedAfter, "max_fave_date" -> favedBefore)

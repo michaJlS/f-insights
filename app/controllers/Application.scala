@@ -1,8 +1,9 @@
 package controllers
 
+import java.util.Calendar
 import javax.inject.Inject
 
-import models.flickr.{ApiClient => FlickrApiClient, UserInfo, ResponseParser}
+import models.flickr.{ApiClient => FlickrApiClient, PhotoExcerpt, ApiRepository, UserInfo, ResponseParser}
 import play.api.Play._
 import play.api._
 import play.api.libs.concurrent.Execution.Implicits._
@@ -11,6 +12,7 @@ import play.api.mvc._
 
 
 import scala.concurrent.Future
+
 
 class Application @Inject() (apiClient: WSClient) extends Controller with Base with Flickr
 {
@@ -26,52 +28,35 @@ class Application @Inject() (apiClient: WSClient) extends Controller with Base w
   }
 
 
+  private def stringifyPhotos(photos:Seq[PhotoExcerpt]):String = {
+    photos.length + " \n\n" + photos.map(" " + _.toString + "\n\n").fold("")(_ + _)
+  }
+
   def test = Action.async( implicit request => {
       val fApi = getFlickrApiClient
       val parser = new ResponseParser
+      val repo = new ApiRepository(fApi, parser)
 
-    fApi.checkToken
-      .map(_ match {
-        case Some(json) => parser.getTokenInfo(json)
-        case _ => None
-      }).flatMap(_ match {
-        case Some(tokenInfo) => fApi.getUserPublicFavorites(nsid = tokenInfo.nsid, perpage =  10)
-        case _ => Future.successful(None)
-      }).map(_ match {
-        case Some(json) => (parser.getPhotosCollectionInfo(json), parser.getPhotos(json))
-        case _ => (None, None)
-      }).map(_ match {
-        case (Some(info), Some(photos)) => {
-          Ok(info.toString + "\n" + photos.map(" " + _.toString + "\n\n").fold("")(_ + _))
+
+      repo.checkToken.flatMap(_ match {
+        case Some(token) => repo.getAllUserPublicFavoritesParallely(token.nsid)
+        case None => Future {None}
+      }).map { res =>
+        println(Calendar.getInstance().getTime)
+        res match {
+          case Some(photos) => {
+            println(Calendar.getInstance().getTime)
+            photos
+            Ok(stringifyPhotos(photos))
+          }
+          case _ => InternalServerError("Nothing")
         }
-        case (None, None) => InternalServerError("Buu1")
-        case (None, _) => InternalServerError("Buu2")
-        case (_, None) => InternalServerError("Buu3")
-      })
-
-
-
-
-
-
-//      fApi.checkToken.map(_.flatMap(parser.getTokenInfo(_)))
-
-//      fApi.checkToken.flatMap(res => res match {
-//        case Some(tokenInfo) => {
-//          fApi.getUserPublicFavorites(tokenInfo.nsid, 1, 3)
-//          fApi.getUserInfo(tokenInfo.nsid)
-//        }
-//        case None => Future.successful(None)
-//      }).map(res => res match {
-//          case Some(userInfo) => Ok(userInfo.toString)
-//          case None => InternalServerError("Buu")
-//      } )
-//    }
-
+      }
   } )
 
+
   private def getFlickrApiClient(implicit request:RequestHeader) = {
-    new FlickrApiClient(current.configuration.getString("alerf.flickr.rest.url").get, apiClient, consumerKey, getRequestToken.get, context)
+    new FlickrApiClient(current.configuration.getString("alerf.flickr.rest.url").get, apiClient, consumerKey, getRequestToken.get)
   }
 
 }
