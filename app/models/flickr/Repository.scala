@@ -5,16 +5,16 @@ import scala.concurrent.{ExecutionContext, Future}
 trait Repository
 {
 
-  def getUserInfo(nsid:String)(implicit executor:ExecutionContext):Future[Option[UserInfo]]
+  def getUserInfo(nsid:String, token:UserToken)(implicit executor:ExecutionContext):Future[Option[UserInfo]]
 
-  def getUserPublicFavorites(nsid:String, page:Int=1, perpage:Int=500,
+  def getUserPublicFavorites(nsid:String, token:UserToken, page:Int=1, perpage:Int=500,
                              favedBefore:Option[String] = None,
                              favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[(CollectionInfo, Seq[PhotoExcerpt])]]
 
 
-  def getAllUserPublicFavoritesSequentially(nsid:String, favedBefore:Option[String] = None, favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[Seq[PhotoExcerpt]]] = {
+  def getAllUserPublicFavoritesSequentially(nsid:String, token:UserToken, favedBefore:Option[String] = None, favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[Seq[PhotoExcerpt]]] = {
     def load(page:Int, all:Seq[PhotoExcerpt] = Seq[PhotoExcerpt]()):Future[Option[Seq[PhotoExcerpt]]] = {
-      getUserPublicFavorites(nsid, page, 500, favedBefore, favedAfter).flatMap(
+      getUserPublicFavorites(nsid, token, page, 500, favedBefore, favedAfter).flatMap(
         _ match  {
           case None => Future {None}
           case Some((info, c)) =>
@@ -29,14 +29,14 @@ trait Repository
     load(1)
   }
 
-  def getAllUserPublicFavoritesParallely(nsid:String, favedBefore:Option[String] = None, favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[Seq[PhotoExcerpt]]] = {
-    getUserPublicFavorites(nsid, 1, 500, favedBefore, favedAfter) flatMap { res =>
+  def getAllUserPublicFavoritesParallely(nsid:String, token:UserToken, favedBefore:Option[String] = None, favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[Seq[PhotoExcerpt]]] = {
+    getUserPublicFavorites(nsid, token, 1, 500, favedBefore, favedAfter) flatMap { res =>
       res match {
         case Some((info, photos)) => {
 
           val ps = for {
             i <- Range(2, info.pages + 1)
-          } yield getUserPublicFavorites(nsid, i, 500, favedBefore, favedAfter).map(_.map(_._2))
+          } yield getUserPublicFavorites(nsid, token, i, 500, favedBefore, favedAfter).map(_.map(_._2))
 
           Future
             .sequence((ps :+ Future {Some(photos)}).toSeq)

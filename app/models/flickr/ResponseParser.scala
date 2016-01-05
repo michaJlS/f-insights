@@ -77,7 +77,7 @@ class ResponseParser
       title  <- (json \ "title").asOpt[String]
       owner <- (json \ "owner").asOpt[String]
       date_upload <- asOptString((json \ "dateupload"))
-      date_taken <- (json \ "datetaken").asOpt[String]
+      date_taken <- (json \ "datetaken").asOpt[String].orElse(Option(""))
       count_views <- asOptInt(json \ "views").orElse(Option(0))
       count_faves <- asOptInt(json \ "count_faves").orElse(Option(0))
       count_comments <- asOptInt(json \ "count_comments").orElse(Option(0))

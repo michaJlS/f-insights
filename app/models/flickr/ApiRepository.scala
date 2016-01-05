@@ -8,17 +8,17 @@ class ApiRepository(apiClient:ApiClient, parser:ResponseParser) extends Reposito
   /**
     * This is not a part of the interface
     */
-  def checkToken()(implicit executor:ExecutionContext):Future[Option[TokenInfo]] = {
-    apiClient.checkToken.map(_.flatMap(parser.getTokenInfo))
+  def checkToken(token:UserToken)(implicit executor:ExecutionContext):Future[Option[TokenInfo]] = {
+    apiClient.checkToken(token).map(_.flatMap(parser.getTokenInfo))
   }
 
-  def getUserInfo(nsid: String)(implicit executor:ExecutionContext): Future[Option[UserInfo]] = {
-    apiClient.getUserInfo(nsid).map(_.flatMap(parser.getUserInfo))
+  def getUserInfo(nsid: String, token:UserToken)(implicit executor:ExecutionContext): Future[Option[UserInfo]] = {
+    apiClient.getUserInfo(nsid, token).map(_.flatMap(parser.getUserInfo))
   }
 
-  def getUserPublicFavorites(nsid: String, page: Int, perpage: Int, favedBefore: Option[String], favedAfter: Option[String])(implicit executor:ExecutionContext)
+  def getUserPublicFavorites(nsid: String, token:UserToken, page: Int, perpage: Int, favedBefore: Option[String], favedAfter: Option[String])(implicit executor:ExecutionContext)
       : Future[Option[(CollectionInfo, Seq[PhotoExcerpt])]] = {
-    apiClient.getUserPublicFavorites(nsid, page, perpage, favedBefore, favedAfter).map(_.flatMap(json =>
+    apiClient.getUserPublicFavorites(nsid, token, page, perpage, favedBefore, favedAfter).map(_.flatMap(json =>
       (parser.getPhotosCollectionInfo(json), parser.getPhotos(json)) match {
         case (Some(info), Some(photos)) => Some((info, photos))
         case (_, _) => None
