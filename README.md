@@ -21,6 +21,16 @@ Running
 sbt "compile -Dconfig.resource=dev.conf"
 sbt "run -Dconfig.resource=dev.conf"
 
+
+
+Frontend
+=========
+npm install
+grunt
+grunt watch
+
+
+
 Readings
 =========
 Flickr  API Docs: https://www.flickr.com/services/api/
