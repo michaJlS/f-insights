@@ -2,9 +2,9 @@ name := "flickr-assistant"
 
 version := "0.1"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file(".")).enablePlugins(PlayScala, SbtWeb)
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.10.6"
 
 libraryDependencies ++= Seq(
   jdbc,
@@ -13,8 +13,9 @@ libraryDependencies ++= Seq(
   specs2 % Test
 )
 
+pipelineStages := Seq(digest)
+
+
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
-// Play provides two styles of routers, one expects its actions to be injected, the
-// other, legacy style, accesses its actions statically.
 routesGenerator := InjectedRoutesGenerator

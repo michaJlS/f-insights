@@ -1,7 +1,9 @@
 package controllers
 
+import models.flickr.{ApiClient => FlickrApiClient, _}
 import play.api.Play.current
 import play.api.libs.oauth.{OAuth, ServiceInfo, ConsumerKey}
+import play.api.libs.ws.WSClient
 
 /**
  *
@@ -18,5 +20,14 @@ trait Flickr
     consumerKey)
 
   val oauth = new OAuth(serviceInfo, true)
+
+
+  protected def flickrApiClient(apiClient: WSClient) = {
+    new FlickrApiClient(current.configuration.getString("alerf.flickr.rest.url").get, apiClient, consumerKey)
+  }
+
+  protected def apiRepository(apiClient: WSClient) = {
+    new ApiRepository(flickrApiClient(apiClient), new ResponseParser)
+  }
 
 }

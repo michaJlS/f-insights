@@ -1,7 +1,5 @@
-@(message: String)
-
-@main("Welcome to Play") {
-
-    @play20.welcome(message)
-
+@import models.flickr.{UserToken, TokenInfo}
+@(ti: TokenInfo, ut: UserToken)
+@main("Halo", ti, ut) {
+<div id="layout"></div>
 }
