@@ -8,5 +8,5 @@ target
 /RUNNING_PID
 /conf/dev.conf
 /node_modules
-/bower_compontents
+/bower_components
 /project/project

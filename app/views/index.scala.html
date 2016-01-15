@@ -1,4 +1,5 @@
-@(message: String)
-@main("Halo") {
+@import models.flickr.{UserToken, TokenInfo}
+@(ti: TokenInfo, ut: UserToken)
+@main("Halo", ti, ut) {
 <div id="layout"></div>
 }

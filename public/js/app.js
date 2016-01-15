@@ -12,10 +12,7 @@ FlickrAssistant.BaseView = Backbone.Layout.extend({
     }
 });
 
-FlickrAssistant.Layout = FlickrAssistant.BaseView.extend({
-    el: "#layout",
-    template: "layout"
-});
+FlickrAssistant.Layout = FlickrAssistant.BaseView.extend({ template: "layout" });
 
 
 FlickrAssistant.App = function() {
@@ -24,7 +21,7 @@ FlickrAssistant.App = function() {
     var layout = null
 
     function initLayout() {
-        layout = new FlickrAssistant.Layout();
+        layout = new FlickrAssistant.Layout({el: "#layout"});
     }
 
     this.bootstrap = function () {
