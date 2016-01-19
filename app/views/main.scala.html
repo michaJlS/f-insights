@@ -1,4 +1,5 @@
 @import models.flickr.{UserToken, TokenInfo}
+@import play.api.libs.json.Json
 @(title: String, ti: TokenInfo, ut: UserToken)(content: Html)
 <!DOCTYPE html>
 <html lang="en">
@@ -25,6 +26,26 @@
 
         <script src="@routes.Assets.versioned("js/templates.js")" type="text/javascript"></script>
         <script src="@routes.Assets.versioned("js/app.js")" type="text/javascript"></script>
+
+        <script type="text/javascript">
+
+            $(document).ready(function() {
+
+                var config = {};
+
+                var context = {
+                    "nsid": @Html(Json.toJson(ti.nsid).toString),
+                    "s": @Html(Json.toJson(ut.secret).toString),
+                    "t": @Html(Json.toJson(ut.token).toString)
+                };
+
+                var templates = FlickrAssistantTemplates;
+
+                var fa = new FlickrAssistant.App(config, context, templates);
+                fa.bootstrap().run();
+            });
+
+        </script>
 
     </head>
     <body>
