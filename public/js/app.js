@@ -32,6 +32,7 @@ FlickrAssistant.Persist = {
     sync: function(obj, args) {
         if (_.has(args, 2)) {
             _.has(args[2], "headers") || (args[2]["headers"] = {});
+            args[2]["headers"]["fa_nsid"] = FlickrAssistant.Context.nsid;
             args[2]["headers"]["fa_secret"] = FlickrAssistant.Context.s;
             args[2]["headers"]["fa_token"] = FlickrAssistant.Context.t;
         } else {
@@ -41,8 +42,6 @@ FlickrAssistant.Persist = {
     }
 
 };
-
-FlickrAssistant.Layout = FlickrAssistant.BaseView.extend({ template: "layout" });
 
 FlickrAssistant.Collection = Backbone.Collection.extend({
     sync: function() {
@@ -90,7 +89,10 @@ FlickrAssistant.App = function(config, context, templates) {
     var layout = null
 
     function initLayout() {
-        layout = new FlickrAssistant.Layout({el: "#layout"});
+        layout = new FlickrAssistant.Layout({
+            el: "#layout",
+            header: new FlickrAssistant.Header()
+        });
     }
 
     function initTemplates() {
@@ -105,6 +107,12 @@ FlickrAssistant.App = function(config, context, templates) {
         _.extend(FlickrAssistant.Context, context);
     }
 
+    function dataloader() {
+        var m = new FlickrAssistant.Models.UserInfo({"nsid": FlickrAssistant.Context.nsid});
+        m.fetch();
+
+    }
+
     this.bootstrap = function () {
         initConfig();
         initContext();
@@ -115,6 +123,9 @@ FlickrAssistant.App = function(config, context, templates) {
 
     this.run = function () {
         layout.render();
+
+        dataloader();
+
         return this;
     }
 
@@ -135,7 +146,17 @@ FlickrAssistant.Collections.UserInfo = FlickrAssistant.Collection.extend({
     "model": FlickrAssistant.Models.UserInfo
 });
 
-$(document).ready(function() {
-    var fa = new FlickrAssistant.App();
-    fa.bootstrap().run();
+
+//
+// VIEWS
+//
+
+FlickrAssistant.Header = FlickrAssistant.BaseView.extend({ template: "header" })
+FlickrAssistant.Layout = FlickrAssistant.BaseView.extend({
+    initialize: function(options) {
+        if (_.has(options, "header")) {
+            this.setView("#header", options.header)
+        }
+    },
+    template: "layout"
 });

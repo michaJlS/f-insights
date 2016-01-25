@@ -44,7 +44,16 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr
 
   def userGetInfo(nsid:String) = Action.async( implicit request => {
     if (nsid.length > 0) {
-      Future {InternalServerError("not yet implemented")}
+      verifyToken((token:UserToken, userNsid:String, ti:TokenInfo) => {
+        repository
+          .getUserInfo(nsid, token)
+          .map({
+            case Some(ui) => {
+              Ok(JsonWriters.userInfo.writes(ui))
+            }
+            case _ => InternalServerError("Error while loading user info.")
+          })
+      })
     } else {
       Future {BadRequest("Provided `nsid` is empty.")}
     }
