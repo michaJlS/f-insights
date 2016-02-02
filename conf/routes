@@ -10,11 +10,14 @@ GET     /auth/login                 controllers.Auth.login
 GET     /auth/logon                 controllers.Auth.logon
 GET     /auth/logout                controllers.Auth.logout
 
+# API - People
+GET     /api/user/info/:nsid       controllers.Api.userGetInfo(nsid: String)
+
 
 # API - Stats
-GET     /api/stats/favs/:nsid/tags        controllers.Api.statsFavsTags(nsid: String)
+GET     /api/stats/favs/:nsid/tags       controllers.Api.statsFavsTags(nsid: String)
 GET     /api/stats/favs/:nsid/owners     controllers.Api.statsFavsOwners(nsid: String)
-GET     /api/stats/user/:nsid/tags        controllers.Api.statsUserTags(nsid: String)
+GET     /api/stats/user/:nsid/tags       controllers.Api.statsUserTags(nsid: String)
 
 
 # Map static resources from the /public folder to the /assets URL path

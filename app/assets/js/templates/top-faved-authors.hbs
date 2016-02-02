@@ -1,0 +1,17 @@
+<h2>Most faved authors</h2>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Author</th>
+        <th>Count</th>
+    </tr>
+    </thead>
+    <tbody>
+        {{#each owners}}
+        <tr>
+            <td><a href="https://www.flickr.com/photos/{{owner}}/" target="_blank"><img src="http://flickr.com/buddyicons/{{owner}}.jpg"> {{owner}}</a></td>
+            <td>{{count}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
