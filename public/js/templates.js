@@ -15,7 +15,7 @@ this["FlickrAssistantTemplates"]["home"] = Handlebars.template({"compiler":[7,">
 },"useData":true});
 
 this["FlickrAssistantTemplates"]["layout"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<header id=\"header\"></header>\n<section id=\"main\" class=\"container\"></section>\n\n<footer id=\"footer\"></footer>";
+    return "<header id=\"header\"></header>\n<section id=\"main\" class=\"container\"></section>\n<footer id=\"footer\"></footer>";
 },"useData":true});
 
 this["FlickrAssistantTemplates"]["top-faved-authors"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
