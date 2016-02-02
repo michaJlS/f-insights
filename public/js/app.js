@@ -2,8 +2,23 @@
 //var layout = new Backbone.Layout({ template: "#layout" });
 Backbone.Layout.configure({});
 
+
+Handlebars.registerHelper("debug", function(optionalValue) {
+  console.log("Current Context");
+  console.log("====================");
+//  console.log(this);
+
+  if (optionalValue) {
+    console.log("Value");
+    console.log("====================");
+    console.log(optionalValue);
+  }
+});
+
+
 var FlickrAssistant = {};
 FlickrAssistant.Models = {};
+FlickrAssistant.Views = {};
 FlickrAssistant.Collections = {};
 FlickrAssistant.Templates = {};
 FlickrAssistant.Context = {
@@ -11,6 +26,8 @@ FlickrAssistant.Context = {
     s: "",
     t: ""
 };
+
+FlickrAssistant.Error = _.extend(Error, {});
 
 FlickrAssistant.debug = function (msg) {
     console.log(msg);
@@ -49,10 +66,22 @@ FlickrAssistant.Collection = Backbone.Collection.extend({
     }
 });
 
+FlickrAssistant.CollectionReadOnly = FlickrAssistant.Collection.extend({
+//    sync: function () {
+////        throw new FlickrAssistant.Error("Can not execute a sync method on a read-only collection.");
+//    }
+});
+
 FlickrAssistant.Model = Backbone.Model.extend({
     sync: function() {
         return FlickrAssistant.Persist.sync(this, arguments);
     }
+});
+
+FlickrAssistant.ModelReadOnly = FlickrAssistant.Model.extend({
+//    sync: function () {
+////        throw new FlickrAssistant.Error("Can not execute a sync method on a read-only model.");
+//    }
 });
 
 //FlickrAssistant.Controller = function () {};
@@ -89,9 +118,10 @@ FlickrAssistant.App = function(config, context, templates) {
     var layout = null
 
     function initLayout() {
-        layout = new FlickrAssistant.Layout({
+        layout = new FlickrAssistant.Views.Layout({
             el: "#layout",
-            header: new FlickrAssistant.Header()
+            header: new FlickrAssistant.Views.Header(),
+            content: new FlickrAssistant.Views.Home()
         });
     }
 
@@ -108,8 +138,7 @@ FlickrAssistant.App = function(config, context, templates) {
     }
 
     function dataloader() {
-        var m = new FlickrAssistant.Models.UserInfo({"nsid": FlickrAssistant.Context.nsid});
-        m.fetch();
+
 
     }
 
@@ -146,16 +175,118 @@ FlickrAssistant.Collections.UserInfo = FlickrAssistant.Collection.extend({
     "model": FlickrAssistant.Models.UserInfo
 });
 
+FlickrAssistant.Models.StatsFavTag = FlickrAssistant.ModelReadOnly.extend({
+    "idAttribute": "tag"
+});
+
+FlickrAssistant.Collections.StatsFavTag = FlickrAssistant.CollectionReadOnly.extend({
+    "nsid": null,
+    "initialize": function (models, options) {
+        if (!_.has(options, "nsid")) {
+            throw new FlickrAssistant.Error("You have to pass `nsid` to create instance of FlickrAssistant.Collections.StatsFavTag.");
+        }
+        this.nsid = options.nsid;
+    },
+    "url": function() {
+        return "/api/stats/favs/" + this.nsid + "/tags";
+    },
+    "model": FlickrAssistant.Models.StatsFavTag,
+    "comparator": function(a, b) {
+          var ac = parseInt(a.get("count"));
+          var bc = parseInt(b.get("count"));
+          if (ac == bc) return 0;
+          if (ac > bc) return -1;
+          return 1;
+    }
+});
+
+FlickrAssistant.Models.StatsFavOwner = FlickrAssistant.ModelReadOnly.extend({
+    "idAttribute": "owner"
+});
+
+FlickrAssistant.Collections.StatsFavOwner = FlickrAssistant.CollectionReadOnly.extend({
+    "nsid": null,
+    "initialize": function (models, options) {
+        if (!_.has(options, "nsid")) {
+            throw new FlickrAssistant.Error("You have to pass `nsid` to create instance of FlickrAssistant.Collections.StatsFavOwner.");
+        }
+        this.nsid = options.nsid;
+    },
+    "url": function() {
+        return "/api/stats/favs/" + this.nsid + "/owners";
+    },
+   "model": FlickrAssistant.Models.StatsFavOwner,
+   "comparator": function(a, b) {
+        var ac = parseInt(a.get("count"));
+        var bc = parseInt(b.get("count"));
+        if (ac == bc) return 0;
+        if (ac > bc) return -1;
+        return 1;
+   }
+});
 
 //
 // VIEWS
 //
 
-FlickrAssistant.Header = FlickrAssistant.BaseView.extend({ template: "header" })
-FlickrAssistant.Layout = FlickrAssistant.BaseView.extend({
+
+FlickrAssistant.Views.TopFavedAuthors = FlickrAssistant.BaseView.extend({
+    owners: null,
+    template: "top-faved-authors",
+    initialize: function () {
+        this.owners = new FlickrAssistant.Collections.StatsFavOwner(null, {"nsid": FlickrAssistant.Context.nsid});
+        this.owners.fetch({async: false});
+    },
+    serialize: function () {
+         return {
+             owners: this.owners.toJSON().slice(0, 30)
+         };
+    }
+});
+
+FlickrAssistant.Views.TopFavedTags = FlickrAssistant.BaseView.extend({
+    tags: null,
+    template: "top-faved-tags",
+    initialize: function () {
+        this.tags = new FlickrAssistant.Collections.StatsFavTag(null, {"nsid": FlickrAssistant.Context.nsid});
+        this.tags.fetch({async: false});
+    },
+    serialize: function () {
+         return {
+             tags: this.tags.toJSON().slice(0, 30)
+         };
+    }
+});
+
+FlickrAssistant.Views.Home = FlickrAssistant.BaseView.extend({
+    template: "home",
+    initialize: function () {
+        this.setView(".left-panel", new FlickrAssistant.Views.TopFavedAuthors(), true)
+        this.setView(".right-panel", new FlickrAssistant.Views.TopFavedTags(), true)
+    }
+});
+
+FlickrAssistant.Views.Header = FlickrAssistant.BaseView.extend({
+    template: "header",
+    userInfo: null,
+    initialize: function () {
+        this.userInfo = new FlickrAssistant.Models.UserInfo({"nsid": FlickrAssistant.Context.nsid});
+        this.userInfo.fetch({async: false});
+    },
+    serialize: function () {
+        return {
+            user: this.userInfo.toJSON()
+        };
+    }
+});
+
+FlickrAssistant.Views.Layout = FlickrAssistant.BaseView.extend({
     initialize: function(options) {
         if (_.has(options, "header")) {
-            this.setView("#header", options.header)
+            this.setView("#header", options.header, true)
+        }
+        if (_.has(options, "content")) {
+            this.setView("#main", options.content, true)
         }
     },
     template: "layout"
