@@ -1,9 +1,11 @@
 package controllers
 
+import java.util.UUID
 import javax.inject.Inject
 
 
 import models.flickr._
+import org.joda.time.DateTime
 import play.api.Play._
 import play.api._
 import play.api.libs.json._
@@ -14,7 +16,7 @@ import play.api.mvc._
 import scala.concurrent.{Future}
 
 
-class Api @Inject() (apiClient: WSClient) extends Controller with Flickr
+class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
 {
 
   val context = defaultContext
@@ -110,5 +112,30 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr
   def statsUserTags(nsid:String) = Action.async( implicit request => {
     Future {InternalServerError("Not yet implemented") }
   } )
+
+  def preload(nsid:String) = Action.async( implicit request => {
+
+    val dashboard = new Dashboard(nsid, UUID.randomUUID(), DateTime.now())
+    val dashboardInfo = AppUserDetail(nsid, "last_dashboard", dashboard.id.toString)
+
+    val token = for {
+      t <- request.headers.get("fa_token")
+      s <- request.headers.get("fa_secret")
+    } yield UserToken(t, s)
+
+    // TODO check ...
+
+    db.Dashboards.insertDashboard(dashboard)
+    db.AppUserDetails.insertDetail(dashboardInfo)
+
+    repository
+      .getAllUserPublicFavoritesParallely(nsid, token.get)
+      .map({
+        case Some(favs) => db.Favourites.insertFavourties(dashboard.id, favs)
+      })
+
+
+    Future {Ok("Ok")}
+  })
 
 }

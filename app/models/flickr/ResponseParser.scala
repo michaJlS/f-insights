@@ -76,6 +76,7 @@ class ResponseParser
       id <- asOptString(json \ "id")
       title  <- (json \ "title").asOpt[String]
       owner <- (json \ "owner").asOpt[String]
+      owner_name <- (json \ "ownername").asOpt[String]
       date_upload <- asOptString((json \ "dateupload"))
       date_taken <- (json \ "datetaken").asOpt[String].orElse(Option(""))
       count_views <- asOptInt(json \ "views").orElse(Option(0))
@@ -89,8 +90,25 @@ class ResponseParser
       url_z <- (json \ "url_m").asOpt[String].orElse(Option(""))
       url_l <- (json \ "url_m").asOpt[String].orElse(Option(""))
       if media == medtiaTypePhoto
-    } yield PhotoExcerpt(id, title, owner, date_upload, date_taken, count_views, count_faves, count_comments, tags, machine_tags,
+    } yield PhotoExcerpt(id, title, owner, owner_name, date_upload, date_taken, count_views, count_faves, count_comments, tags, machine_tags,
               PhotoUrls(largeSquareThumb = url_q, largeThumb = url_m, small = url_z, large = url_l))
+  }
+
+  def getFavourite(json:JsValue, favFor:String = ""):Option[Favourite] = {
+    for {
+      photo <- getPhotoExcerpt(json)
+      date_faved <- (json \ "date_faved").asOpt[String]
+    } yield Favourite(photo, favFor, date_faved)
+  }
+
+  def getFavourites(json:JsValue, favsFor:String  = ""):Option[Seq[Favourite]] = {
+    (json \ "photos" \ "photo").toOption match {
+      case Some(JsArray(s)) => Some(for {
+        js <- s
+        fav <- getFavourite(js, favsFor)
+      } yield fav)
+      case _ => None
+    }
   }
 
   def getPhotos(json:JsValue):Option[Seq[PhotoExcerpt]] = {

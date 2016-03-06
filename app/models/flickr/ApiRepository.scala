@@ -17,9 +17,9 @@ class ApiRepository(apiClient:ApiClient, parser:ResponseParser) extends Reposito
   }
 
   def getUserPublicFavorites(nsid: String, token:UserToken, page: Int, perpage: Int, favedBefore: Option[String], favedAfter: Option[String])(implicit executor:ExecutionContext)
-      : Future[Option[(CollectionInfo, Seq[PhotoExcerpt])]] = {
+      : Future[Option[(CollectionInfo, Seq[Favourite])]] = {
     apiClient.getUserPublicFavorites(nsid, token, page, perpage, favedBefore, favedAfter).map(_.flatMap(json =>
-      (parser.getPhotosCollectionInfo(json), parser.getPhotos(json)) match {
+      (parser.getPhotosCollectionInfo(json), parser.getFavourites(json, nsid)) match {
         case (Some(info), Some(photos)) => Some((info, photos))
         case (_, _) => None
       }

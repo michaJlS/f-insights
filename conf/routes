@@ -10,6 +10,9 @@ GET     /auth/login                 controllers.Auth.login
 GET     /auth/logon                 controllers.Auth.logon
 GET     /auth/logout                controllers.Auth.logout
 
+# API - Test
+POST    /api/dashboard/:nsid       controllers.Api.preload(nsid: String)
+
 # API - People
 GET     /api/user/info/:nsid       controllers.Api.userGetInfo(nsid: String)
 
