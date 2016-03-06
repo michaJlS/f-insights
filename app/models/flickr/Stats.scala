@@ -4,12 +4,12 @@ package models.flickr
 
 class Stats {
 
-  def tagsStats(photos:Seq[PhotoExcerpt]) = {
-    photos.flatMap(_.allTagsList).groupBy(tag => tag).mapValues(_.length)
+  def tagsStats(photos:Seq[Favourite]) = {
+    photos.flatMap(_.photo.allTagsList).groupBy(tag => tag).mapValues(_.length)
   }
 
-  def ownersStats(photos:Seq[PhotoExcerpt]) = {
-    photos.map(_.owner).groupBy(author => author).mapValues(_.length)
+  def ownersStats(photos:Seq[Favourite]) = {
+    photos.map(_.photo.owner).groupBy(author => author).mapValues(_.length)
   }
 
 }

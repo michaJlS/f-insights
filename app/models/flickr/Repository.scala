@@ -9,11 +9,11 @@ trait Repository
 
   def getUserPublicFavorites(nsid:String, token:UserToken, page:Int=1, perpage:Int=500,
                              favedBefore:Option[String] = None,
-                             favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[(CollectionInfo, Seq[PhotoExcerpt])]]
+                             favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[(CollectionInfo, Seq[Favourite])]]
 
 
-  def getAllUserPublicFavoritesSequentially(nsid:String, token:UserToken, favedBefore:Option[String] = None, favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[Seq[PhotoExcerpt]]] = {
-    def load(page:Int, all:Seq[PhotoExcerpt] = Seq[PhotoExcerpt]()):Future[Option[Seq[PhotoExcerpt]]] = {
+  def getAllUserPublicFavoritesSequentially(nsid:String, token:UserToken, favedBefore:Option[String] = None, favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[Seq[Favourite]]] = {
+    def load(page:Int, all:Seq[Favourite] = Seq[Favourite]()):Future[Option[Seq[Favourite]]] = {
       getUserPublicFavorites(nsid, token, page, 500, favedBefore, favedAfter).flatMap(
         _ match  {
           case None => Future {None}
@@ -29,7 +29,7 @@ trait Repository
     load(1)
   }
 
-  def getAllUserPublicFavoritesParallely(nsid:String, token:UserToken, favedBefore:Option[String] = None, favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[Seq[PhotoExcerpt]]] = {
+  def getAllUserPublicFavoritesParallely(nsid:String, token:UserToken, favedBefore:Option[String] = None, favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[Seq[Favourite]]] = {
     getUserPublicFavorites(nsid, token, 1, 500, favedBefore, favedAfter) flatMap { res =>
       res match {
         case Some((info, photos)) => {

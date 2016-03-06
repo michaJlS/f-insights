@@ -95,7 +95,7 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey)
       "page" -> page.toString,
       "per_page" -> perpage.toString,
       "extras" ->
-        "date_upload,date_taken,tags,machine_tags,views,media,count_faves,count_comments,url_q,url_m,url_z,url_l")
+        "owner_name,date_upload,date_taken,tags,machine_tags,views,media,count_faves,count_comments,url_q,url_m,url_z,url_l")
 
     val optional = Map("min_fave_date" -> favedAfter, "max_fave_date" -> favedBefore)
     val h = setQueryParams(qp) _ compose setApiMethod("flickr.favorites.getPublicList") _ compose setOptionalParams(optional)
