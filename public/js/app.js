@@ -165,6 +165,13 @@ FlickrAssistant.App = function(config, context, templates) {
 // MODELS
 //
 
+
+FlickrAssistant.Models.Dashboard = FlickrAssistant.Model.extend({
+    "urlRoot": "api/dashboard",
+    "idAttribute": "nsid"
+});
+
+
 FlickrAssistant.Models.UserInfo = FlickrAssistant.Model.extend({
     "urlRoot": "api/user/info",
     "idAttribute": "nsid"

@@ -3,6 +3,8 @@ package infrastructure.cassandra.table
 import com.websudos.phantom.dsl._
 import models.flickr.AppUserDetail
 
+import scala.concurrent.Future
+
 
 sealed class AppUserDetails extends CassandraTable[AppUserDetails, AppUserDetail]
 {
@@ -21,14 +23,15 @@ abstract class ConcreteAppUserDetails extends AppUserDetails with RootConnector
 {
 
   def insertDetail(detail: AppUserDetail) = {
-    insert
-      .value(_.nsid, detail.nsid)
-      .value(_.detail_key, detail.detail_key)
-      .value(_.detail_value, detail.detail_value)
-      .future()
+    insert.
+      value(_.nsid, detail.nsid).
+      value(_.detail_key, detail.detail_key).
+      value(_.detail_value, detail.detail_value).
+      future().
+      map(_ => true)
   }
 
-  def getDetail(nsid: String, key: String) = {
+  def getDetail(nsid: String, key: String): Future[Option[AppUserDetail]] = {
     select.where(_.nsid eqs nsid).and(_.detail_key eqs key).one
   }
 

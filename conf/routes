@@ -13,6 +13,9 @@ GET     /auth/logout                controllers.Auth.logout
 # API - Test
 POST    /api/dashboard/:nsid       controllers.Api.preload(nsid: String)
 
+# API - Dashboard
+GET     /api/dashboard/:nsid       controllers.Api.getLastDashboard(nsid: String)
+
 # API - People
 GET     /api/user/info/:nsid       controllers.Api.userGetInfo(nsid: String)
 

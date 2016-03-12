@@ -4,6 +4,8 @@ import com.websudos.phantom.dsl._
 import java.util.UUID
 import models.flickr.Dashboard
 
+import scala.concurrent.Future
+
 sealed class Dashboards extends CassandraTable[Dashboards, Dashboard]
 {
 
@@ -22,19 +24,27 @@ sealed class Dashboards extends CassandraTable[Dashboards, Dashboard]
 abstract class ConcreteDashboards extends Dashboards with RootConnector
 {
 
-  def insertDashboard(dashboard: Dashboard) = {
+  /**
+    * @throws Exception
+    * @param dashboard
+    * @return
+    *
+    */
+  def insertDashboard(dashboard: Dashboard): Future[Boolean] = {
     insert.
       value(_.nsid, dashboard.nsid).
       value(_.dashboard_id, dashboard.id).
       value(_.created_at, dashboard.created_at).
-      future()
+      future().
+      map(_ => true)
   }
 
-  def getById(nsid: String, dashboard_id: UUID) = {
+  def getById(nsid: String, dashboard_id: UUID): Future[Option[Dashboard]] = {
     select.
       where(_.nsid eqs nsid).
       and(_.dashboard_id eqs dashboard_id).
       one()
   }
+
 
 }

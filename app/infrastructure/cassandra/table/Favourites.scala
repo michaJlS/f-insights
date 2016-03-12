@@ -4,7 +4,6 @@ import com.websudos.phantom.dsl._
 import java.util.UUID
 import models.flickr.{Favourite, PhotoExcerpt, PhotoUrls}
 
-import scala.concurrent.Future
 
 class Favourites extends CassandraTable[Favourites, Favourite]
 {
@@ -54,15 +53,16 @@ abstract class ConcreteFavourites extends Favourites with RootConnector
       value(_.tags, fav.photo.tags).
       value(_.machine_tags, fav.photo.machine_tags).
       value(_.urls, fav.photo.urls.toMap).
-      future()
+      future().
+      map(_ => true)
   }
 
-  def getByDashboardId(dashboard_id: UUID) = {
-    select.where(_.dashboard_id eqs dashboard_id).collect()
+  def getByDashboardId(dashboard_id: UUID)  = {
+    select.
+      where(_.dashboard_id eqs dashboard_id).
+      fetch()
   }
 
-  def insertFavourties(dashboard_id: UUID, favs: Seq[Favourite]) = {
-    Future.sequence(favs.map(insertFavourite(dashboard_id, _)))
-  }
+
 
 }

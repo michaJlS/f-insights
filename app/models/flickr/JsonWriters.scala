@@ -25,4 +25,16 @@ object JsonWriters
     }
   }
 
+  lazy val dashboard = {
+    new Writes[Dashboard] {
+      def writes(d:Dashboard) = {
+        Json.obj(
+          "id" -> d.id.toString,
+          "nsid" -> d.nsid,
+          "created_at" -> d.created_at
+        )
+      }
+    }
+  }
+
 }
