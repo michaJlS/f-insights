@@ -108,6 +108,26 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
       checkNsid(nsid, () => ifTokenIsOk(favsOwnersFunc))
   } )
 
+
+  def richStatsFavsOwners(nsid:String) = Action.async( implicit request => {
+
+    val favsTagsFunc = (token:UserToken, userNsid:String, ti:TokenInfo) => {
+      dashboardService.
+        getFavouritesFromLastDashboard(userNsid).
+        map {
+          case Some(favs) => Some(stats.richOwnersStats(favs))
+          case None => None
+        } .
+        map {
+          case Some(tagsStats) => Ok(JsonWriters.richFavsOwnersStats.writes(tagsStats))
+          case None => InternalServerError("Error during preparing stats of favs tags")
+        }
+    }
+
+    checkMyNsid(nsid, favsTagsFunc)
+  } )
+
+
   def statsUserTags(nsid:String) = Action.async( implicit request => {
     Future {InternalServerError("Not yet implemented") }
   } )

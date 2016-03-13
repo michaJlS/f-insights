@@ -102,8 +102,17 @@ object JsonWriters
 
   lazy val richFavsOwnersStats = {
     new Writes[Map[String, (String, String, Int, Seq[Favourite])]] {
+      private def unwrapped(owner:String, owner_name:String, count:Int, favs:Seq[Favourite]) = Json.obj(
+        "owner" -> owner,
+        "owner_name" -> owner_name,
+        "count" -> count,
+        "photos" -> favourites.writes(favs)
+      )
+
+      private def ignoreKey(key:String, v:(String, String, Int, Seq[Favourite])) = unwrapped(v._1, v._2, v._3, v._4)
+
       def writes(stats: Map[String, (String, String, Int, Seq[Favourite])]) = {
-        Json.obj("1" -> 1)
+        JsArray(stats.map(item => ignoreKey(item._1, item._2)).toSeq)
       }
     }
   }
