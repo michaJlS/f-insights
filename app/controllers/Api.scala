@@ -41,41 +41,20 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
       checkNsid(nsid, () => ifTokenIsOk(userInfoFunc))
   } )
 
+
   def statsFavsTags(nsid:String) = Action.async( implicit request => {
 
-      val favsTagsFunc = (token:UserToken, userNsid:String, ti:TokenInfo) => {
-        repository.
-          getAllUserPublicFavoritesParallely(nsid, token).
-          map {
-            case Some(favs) => Right(stats.tagsStats(favs))
-            case _ => Left(InternalServerError("Error while loading favourties list."))
-          }.
-          map {
-            case Right(tags) => {
-              val json = JsArray(tags.map({
-                case (tag:String, count:Int) => Json.obj("tag" -> tag, "count" -> count.toString)
-              }).toSeq)
-              Ok(Json.toJson(json))
-            }
-            case Left(resp) => resp
-          }
-      }
-
-      checkNsid(nsid, () => ifTokenIsOk(favsTagsFunc))
-  } )
-
-
-  def richStatsFavsTags(nsid:String) = Action.async( implicit request => {
+    val threshold = request.getQueryString("threshold").map(_.toInt).getOrElse(3)
 
     val favsTagsFunc = (token:UserToken, userNsid:String, ti:TokenInfo) => {
       dashboardService.
         getFavouritesFromLastDashboard(userNsid).
         map {
-          case Some(favs) => Some(stats.richTagsStats(favs))
+          case Some(favs) => Some(stats.favsTagsStats(favs, threshold))
           case None => None
         } .
         map {
-          case Some(tagsStats) => Ok(JsonWriters.richFavsTagsStats.writes(tagsStats))
+          case Some(tagsStats) => Ok(JsonWriters.favsTagsStats.writes(tagsStats))
           case None => InternalServerError("Error during preparing stats of favs tags")
         }
     }
@@ -84,42 +63,19 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
   } )
 
 
-
   def statsFavsOwners(nsid:String) = Action.async( implicit request => {
 
-      val favsOwnersFunc = (token:UserToken, userNsid:String, ti:TokenInfo) => {
-        repository
-          .getAllUserPublicFavoritesParallely(nsid, token)
-          .map({
-            case Some(favs) => Right(stats.ownersStats(favs))
-            case _ => Left(InternalServerError("Error while loading favourties list."))
-          })
-          .map({
-            case Right(tags) => {
-              val json = JsArray(tags.map({
-                case (owner:String, count:Int) => Json.obj("owner" -> owner, "count" -> count.toString)
-              }).toSeq)
-              Ok(Json.toJson(json))
-            }
-            case Left(resp) => resp
-          })
-      }
-
-      checkNsid(nsid, () => ifTokenIsOk(favsOwnersFunc))
-  } )
-
-
-  def richStatsFavsOwners(nsid:String) = Action.async( implicit request => {
+    val threshold = request.getQueryString("threshold").map(_.toInt).getOrElse(3)
 
     val favsTagsFunc = (token:UserToken, userNsid:String, ti:TokenInfo) => {
       dashboardService.
         getFavouritesFromLastDashboard(userNsid).
         map {
-          case Some(favs) => Some(stats.richOwnersStats(favs))
+          case Some(favs) => Some(stats.favsOwnersStats(favs))
           case None => None
         } .
         map {
-          case Some(tagsStats) => Ok(JsonWriters.richFavsOwnersStats.writes(tagsStats))
+          case Some(tagsStats) => Ok(JsonWriters.favsOwnersStats.writes(tagsStats))
           case None => InternalServerError("Error during preparing stats of favs tags")
         }
     }

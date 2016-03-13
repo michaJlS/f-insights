@@ -183,7 +183,10 @@ FlickrAssistant.Collections.UserInfo = FlickrAssistant.Collection.extend({
 });
 
 FlickrAssistant.Models.StatsFavTag = FlickrAssistant.ModelReadOnly.extend({
-    "idAttribute": "tag"
+    "idAttribute": "tag",
+    initialize: function (attributes, options) {
+        this.set("topphotos", this.get("photos").slice(0, Math.min(5, this.get("photos").length)))
+    }
 });
 
 FlickrAssistant.Collections.StatsFavTag = FlickrAssistant.CollectionReadOnly.extend({
@@ -208,7 +211,10 @@ FlickrAssistant.Collections.StatsFavTag = FlickrAssistant.CollectionReadOnly.ext
 });
 
 FlickrAssistant.Models.StatsFavOwner = FlickrAssistant.ModelReadOnly.extend({
-    "idAttribute": "owner"
+    "idAttribute": "owner",
+    initialize: function (attributes, options) {
+          this.set("topphotos", this.get("photos").slice(0, Math.min(5, this.get("photos").length)))
+    }
 });
 
 FlickrAssistant.Collections.StatsFavOwner = FlickrAssistant.CollectionReadOnly.extend({
@@ -246,7 +252,7 @@ FlickrAssistant.Views.TopFavedAuthors = FlickrAssistant.BaseView.extend({
     },
     serialize: function () {
          return {
-             owners: this.owners.toJSON().slice(0, 30)
+             owners: this.owners.toJSON().slice(0, 10)
          };
     }
 });
@@ -260,7 +266,7 @@ FlickrAssistant.Views.TopFavedTags = FlickrAssistant.BaseView.extend({
     },
     serialize: function () {
          return {
-             tags: this.tags.toJSON().slice(0, 30)
+             tags: this.tags.toJSON().slice(0, 10)
          };
     }
 });
@@ -276,9 +282,13 @@ FlickrAssistant.Views.Home = FlickrAssistant.BaseView.extend({
 FlickrAssistant.Views.Header = FlickrAssistant.BaseView.extend({
     template: "header",
     userInfo: null,
+    dashboard: null,
     initialize: function () {
         this.userInfo = new FlickrAssistant.Models.UserInfo({"nsid": FlickrAssistant.Context.nsid});
         this.userInfo.fetch({async: false});
+
+//        this.dashboard = new FlickrAssistant.Models.Dashboard({"nsid": FlickrAssistant.Context.nsid});
+//        this.userInfo.fetch({async: false});
     },
     serialize: function () {
         return {

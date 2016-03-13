@@ -21,8 +21,8 @@ GET     /api/user/info/:nsid       controllers.Api.userGetInfo(nsid: String)
 
 
 # API - Stats
-GET     /api/stats/favs/:nsid/tags       controllers.Api.richStatsFavsTags(nsid: String)
-GET     /api/stats/favs/:nsid/owners     controllers.Api.richStatsFavsOwners(nsid: String)
+GET     /api/stats/favs/:nsid/tags       controllers.Api.statsFavsTags(nsid: String)
+GET     /api/stats/favs/:nsid/owners     controllers.Api.statsFavsOwners(nsid: String)
 GET     /api/stats/user/:nsid/tags       controllers.Api.statsUserTags(nsid: String)
 
 

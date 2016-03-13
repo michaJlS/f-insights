@@ -56,6 +56,15 @@ object JsonWriters
     new Writes[PhotoExcerpt] {
       def writes(p:PhotoExcerpt) = {
         Json.obj(
+          "id" -> p.id,
+          "title" -> p.title,
+          "owner" -> p.owner,
+          "owner_name" -> p.owner_name,
+          "date_upload" -> p.date_upload,
+          "date_taken" -> p.date_taken,
+          "count_views" -> p.count_views,
+          "count_faves" -> p.count_faves,
+          "count_comments" -> p.count_comments,
           "urls" -> photoUrls.writes(p.urls)
         )
       }
@@ -82,40 +91,37 @@ object JsonWriters
     }
   }
 
-  lazy val richFavsTagsStats = {
-    new Writes[Map[String, (Int, Seq[Favourite])]] {
-
-      private def unwrappedCountAndFavs(tag:String, count:Int, favs: Seq[Favourite]) = {
-        Json.obj(
-          "tag" -> tag,
-          "count" -> count,
-          "photos" -> favourites.writes(favs)
-        )
-      }
-
-      private def unwrappedTag(tag:String, v:(Int, Seq[Favourite])) = unwrappedCountAndFavs(tag, v._1, v._2)
-
-      def writes(stats:Map[String, (Int, Seq[Favourite])]) = JsArray(stats.map(x => unwrappedTag(x._1, x._2)).toSeq)
-
-    }
-  }
-
-  lazy val richFavsOwnersStats = {
-    new Writes[Map[String, (String, String, Int, Seq[Favourite])]] {
-      private def unwrapped(owner:String, owner_name:String, count:Int, favs:Seq[Favourite]) = Json.obj(
-        "owner" -> owner,
-        "owner_name" -> owner_name,
-        "count" -> count,
-        "photos" -> favourites.writes(favs)
+  lazy val favsTagStat = {
+    new Writes[FavTagStats] {
+      def writes(tagStats:FavTagStats) = Json.obj(
+        "tag" -> tagStats.tag,
+        "count" -> tagStats.count,
+        "photos" -> favourites.writes(tagStats.photos)
       )
-
-      private def ignoreKey(key:String, v:(String, String, Int, Seq[Favourite])) = unwrapped(v._1, v._2, v._3, v._4)
-
-      def writes(stats: Map[String, (String, String, Int, Seq[Favourite])]) = {
-        JsArray(stats.map(item => ignoreKey(item._1, item._2)).toSeq)
-      }
     }
   }
 
+  lazy val favsTagsStats = {
+    new Writes[Seq[FavTagStats]] {
+      def writes(stats:Seq[FavTagStats]) = JsArray(stats.map(favsTagStat.writes(_)).toSeq)
+    }
+  }
+
+  lazy val favsOwnerStats = {
+    new Writes[FavOwnerStats] {
+      def writes(ownerStats:FavOwnerStats) = Json.obj(
+        "owner" -> ownerStats.owner,
+        "owner_name" -> ownerStats.owner_name,
+        "count" -> ownerStats.count,
+        "photos" -> favourites.writes(ownerStats.photos)
+      )
+    }
+  }
+
+  lazy val favsOwnersStats = {
+    new Writes[Seq[FavOwnerStats]] {
+      def writes(stats: Seq[FavOwnerStats]) = JsArray(stats.map(favsOwnerStats.writes(_)).toSeq)
+    }
+  }
 
 }

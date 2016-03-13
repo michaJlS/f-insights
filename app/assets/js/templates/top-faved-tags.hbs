@@ -12,6 +12,13 @@
             <td>{{tag}}</td>
             <td>{{count}}</td>
         </tr>
+        <tr>
+            <td colspan="2">
+                {{#each topphotos}}
+                    <a href="https://www.flickr.com/photos/{{photo.owner}}/{{photo.id}}" target="_blank"><img src="{{photo.urls.largeSquareThumb}}"></a>
+                {{/each}}
+            </td>
+        </tr>
     {{/each}}
     </tbody>
 </table>
