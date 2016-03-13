@@ -101,7 +101,7 @@ object JsonWriters
   }
 
   lazy val richFavsOwnersStats = {
-    new Writes[Map[String, (String, String, Int, Seq[Favourite]])] = {
+    new Writes[Map[String, (String, String, Int, Seq[Favourite])]] {
       def writes(stats: Map[String, (String, String, Int, Seq[Favourite])]) = {
         Json.obj("1" -> 1)
       }
