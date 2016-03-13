@@ -38,5 +38,13 @@ class DashboardService(appRepository: AppRepository)
       .map(_ => Some(dashboard.id))
   }
 
+  def getFavouritesFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Favourite]]] = {
+    getLastDashboard(nsid).
+      flatMap({
+        case Some(dashboard) => appRepository.getFavouritesByDashboardId(dashboard.id).map((favs:List[Favourite]) => Some(favs))
+        case _ => Future {None}
+      })
+  }
+
 
 }

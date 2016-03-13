@@ -33,15 +33,12 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
         repository.
           getUserInfo(nsid, token).
           map {
-            case Some(ui) => {
-              Ok(JsonWriters.userInfo.writes(ui))
-            }
+            case Some(ui) =>  Ok(JsonWriters.userInfo.writes(ui))
             case _ => InternalServerError("Error while loading user info.")
           }
       }
 
       checkNsid(nsid, () => ifTokenIsOk(userInfoFunc))
-
   } )
 
   def statsFavsTags(nsid:String) = Action.async( implicit request => {
@@ -62,10 +59,31 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
             }
             case Left(resp) => resp
           }
-      };
+      }
 
       checkNsid(nsid, () => ifTokenIsOk(favsTagsFunc))
   } )
+
+
+  def richStatsFavsTags(nsid:String) = Action.async( implicit request => {
+
+    val favsTagsFunc = (token:UserToken, userNsid:String, ti:TokenInfo) => {
+      dashboardService.
+        getFavouritesFromLastDashboard(userNsid).
+        map {
+          case Some(favs) => Some(stats.richTagsStats(favs))
+          case None => None
+        } .
+        map {
+          case Some(tagsStats) => Ok(JsonWriters.richFavsTagsStats.writes(tagsStats))
+          case None => InternalServerError("Error during preparing stats of favs tags")
+        }
+    }
+
+    checkMyNsid(nsid, favsTagsFunc)
+  } )
+
+
 
   def statsFavsOwners(nsid:String) = Action.async( implicit request => {
 
@@ -88,7 +106,6 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
       }
 
       checkNsid(nsid, () => ifTokenIsOk(favsOwnersFunc))
-
   } )
 
   def statsUserTags(nsid:String) = Action.async( implicit request => {
@@ -100,13 +117,10 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
   def getLastDashboard(nsid: String) = Action.async( implicit request => {
 
       val getDashboardFunc = (token:UserToken, userNsid:String, ti:TokenInfo) => {
-        if (userNsid!=nsid)
-          Future { Forbidden("You can only try to acces own dashboards.") }
-        else
-          dashboardService.getLastDashboard(nsid).map({
-            case Some(dashboard) => Ok(JsonWriters.dashboard.writes(dashboard))
-            case None => NotFound("Could not find dashboard")
-          })
+        dashboardService.getLastDashboard(nsid).map({
+          case Some(dashboard) => Ok(JsonWriters.dashboard.writes(dashboard))
+          case None => NotFound("Could not find dashboard")
+        })
       }
 
       checkNsid(nsid, () => ifTokenIsOk(getDashboardFunc))
@@ -116,22 +130,19 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
   def preload(nsid:String) = Action.async( implicit request => {
 
     val buildDashboardFunc = (token:UserToken, userNsid:String, ti:TokenInfo) => {
-      if (userNsid!=nsid)
-        Future { Forbidden("You can only try to acces own dashboards.") }
-      else
-        repository.
-          getAllUserPublicFavoritesParallely(userNsid, token).
-          flatMap {
-            case Some(favs) => dashboardService.buildNewDashboard(userNsid, favs)
-            case None => Future {None}
-          }.
-          map {
-            case Some(dashboardId) => Ok("ok")
-            case None => InternalServerError("Something went wrong.")
-          }
+      repository.
+        getAllUserPublicFavoritesParallely(userNsid, token).
+        flatMap {
+          case Some(favs) => dashboardService.buildNewDashboard(userNsid, favs)
+          case None => Future {None}
+        }.
+        map {
+          case Some(dashboardId) => Ok("ok")
+          case None => InternalServerError("Something went wrong.")
+        }
     }
 
-    checkNsid(nsid, () => ifTokenIsOk(buildDashboardFunc))
+    checkMyNsid(nsid, buildDashboardFunc)
   })
 
   private def checkNsid(nsid:String, f:(()=>Future[Result]))(implicit request:Request[AnyContent]):Future[Result] = {
@@ -139,6 +150,19 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
       Future {BadRequest("Provided `nsid` is empty.")}
     else
       f()
+  }
+
+  private def checkMyNsid(nsid:String, f:((UserToken, String, TokenInfo)=>Future[Result]))(implicit request:Request[AnyContent]):Future[Result] = {
+
+    val isMyNsidFunc = (token:UserToken, userNsid:String, ti:TokenInfo) => {
+      if (userNsid!=nsid)
+        Future { Forbidden("You can only try to acces own dashboards.") }
+      else
+        f(token, userNsid, ti)
+    }
+
+    checkNsid(nsid, () => ifTokenIsOk(isMyNsidFunc))
+
   }
 
   private def ifTokenIsOk(f:((UserToken, String, TokenInfo) => Future[Result]))(implicit request:Request[AnyContent]) = {
