@@ -2,7 +2,7 @@ package domain.service
 
 import java.util.UUID
 
-import models.flickr.{AppUserDetail, Dashboard, Favourite}
+import models.flickr.{Contact, AppUserDetail, Dashboard, Favourite}
 import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,7 +26,7 @@ class DashboardService(appRepository: AppRepository)
       }
   }
 
-  def buildNewDashboard(nsid: String, favs: Seq[Favourite])(implicit executor:ExecutionContext) = {
+  def buildNewDashboard(nsid: String, favs: Seq[Favourite], contacts: Seq[Contact])(implicit executor:ExecutionContext) = {
 
     val dashboard = new Dashboard(nsid, UUID.randomUUID(), DateTime.now())
     val dashboardInfo = AppUserDetail(nsid, DashboardService.dashboard_property_name, dashboard.id.toString)
@@ -34,8 +34,9 @@ class DashboardService(appRepository: AppRepository)
     appRepository.
       insertDashboard(dashboard).
       flatMap(_ => appRepository.insertFavourties(dashboard.id, favs)).
-      flatMap(_ => appRepository.insertUserDetail(dashboardInfo))
-      .map(_ => Some(dashboard.id))
+      flatMap(_ => appRepository.insertUserDetail(dashboardInfo)).
+      flatMap(_ => appRepository.insertContacts(dashboard.id, contacts)).
+      map(_ => Some(dashboard.id))
   }
 
   def getFavouritesFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Favourite]]] = {
@@ -46,5 +47,12 @@ class DashboardService(appRepository: AppRepository)
       })
   }
 
+  def getContactsFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Contact]]] = {
+    getLastDashboard(nsid).
+      flatMap({
+        case Some(dashboard) => appRepository.getContactsByDashboardId(dashboard.id).map((contacts:List[Contact]) => Some(contacts))
+        case _ => Future {None}
+      })
+  }
 
 }

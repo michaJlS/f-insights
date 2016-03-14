@@ -41,6 +41,19 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
       checkNsid(nsid, () => ifTokenIsOk(userInfoFunc))
   } )
 
+  def userGetContacts(nsid:String) = Action.async( implicit request => {
+
+    val userContactsFunc = (token:UserToken, userNsid:String, ti:TokenInfo) => {
+      dashboardService.
+        getContactsFromLastDashboard(userNsid).
+        map {
+          case Some(contacts) => Ok(JsonWriters.userContacts.writes(contacts))
+          case _ => InternalServerError("Error during fetching contacts.")
+        }
+    }
+
+    checkMyNsid(nsid, userContactsFunc)
+  } )
 
   def statsFavsTags(nsid:String) = Action.async( implicit request => {
 
@@ -106,16 +119,21 @@ class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
   def preload(nsid:String) = Action.async( implicit request => {
 
     val buildDashboardFunc = (token:UserToken, userNsid:String, ti:TokenInfo) => {
-      repository.
-        getAllUserPublicFavoritesParallely(userNsid, token).
-        flatMap {
-          case Some(favs) => dashboardService.buildNewDashboard(userNsid, favs)
-          case None => Future {None}
-        }.
-        map {
+
+      val data = for {
+        fFavs <- repository.getAllUserPublicFavoritesParallely(userNsid, token)
+        fContacts <- repository.getAllUserPublicContacts(userNsid, token)
+      } yield (fFavs, fContacts)
+
+      data.
+        flatMap({
+          case (Some(favs), Some(contacts)) => dashboardService.buildNewDashboard(userNsid, favs, contacts)
+          case (_, _) => Future {None}
+        }).
+        map({
           case Some(dashboardId) => Ok("ok")
-          case None => InternalServerError("Something went wrong.")
-        }
+          case _ => InternalServerError("Something went wrong.")
+        })
     }
 
     checkMyNsid(nsid, buildDashboardFunc)

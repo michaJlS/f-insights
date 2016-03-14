@@ -18,7 +18,7 @@ GET     /api/dashboard/:nsid       controllers.Api.getLastDashboard(nsid: String
 
 # API - People
 GET     /api/user/info/:nsid       controllers.Api.userGetInfo(nsid: String)
-
+GET     /api/user/contacts/:nsid   controllers.Api.userGetContacts(nsid: String)
 
 # API - Stats
 GET     /api/stats/favs/:nsid/tags       controllers.Api.statsFavsTags(nsid: String)

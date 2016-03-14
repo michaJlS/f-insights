@@ -60,15 +60,19 @@ class ResponseParser
     } yield UserInfo(id, nsid, username, fullname, photosurl, uploads, firstupload)
   }
 
-  def getPhotosCollectionInfo(json:JsValue):Option[CollectionInfo] = {
+  def getCollectionInfo(json:JsValue, root:String) = {
     for {
-      photos <- (json \ "photos").toOption
-      page <-  asOptInt(photos \ "page")
-      pages <- asOptInt(photos \ "pages")
-      perpage <- asOptInt(photos \ "perpage")
-      total <- asOptInt(photos \ "total")
+      ci <- (json \ root).toOption
+      page <-  asOptInt(ci \ "page")
+      pages <- asOptInt(ci \ "pages")
+      perpage <- asOptInt(ci \ "perpage")
+      total <- asOptInt(ci \ "total")
     } yield CollectionInfo(page, pages, perpage, total)
   }
+
+  def getPhotosCollectionInfo(json:JsValue):Option[CollectionInfo] = getCollectionInfo(json, "photos")
+
+  def getContactsCollectionInfo(json:JsValue):Option[CollectionInfo] = getCollectionInfo(json, "contacts")
 
   def getPhotoExcerpt(json:JsValue):Option[PhotoExcerpt] = {
     // // https://www.flickr.com/services/api/misc.urls.html
@@ -111,6 +115,23 @@ class ResponseParser
     }
   }
 
+  def getContact(json:JsValue, contactOf:String = "") = {
+    for {
+      nsid <- asOptString(json \ "nsid")
+      username <- asOptString(json \ "username")
+    } yield Contact(nsid, username, contactOf)
+  }
+
+  def getContacts(json:JsValue, contactsOf:String = "") = {
+    (json \ "contacts" \ "contact").toOption match {
+      case Some(JsArray(s)) => Some(for {
+        js <- s
+        c <- getContact(js, contactsOf)
+      } yield c)
+      case _ => None
+    }
+  }
+
   def getPhotos(json:JsValue):Option[Seq[PhotoExcerpt]] = {
     (json \ "photos" \ "photo").toOption match {
       case Some(JsArray(s)) => Some(for {
@@ -118,6 +139,20 @@ class ResponseParser
         photo <- getPhotoExcerpt(js)
       } yield photo)
       case _ => None
+    }
+  }
+
+  def getFavouritesWithCollectionInfo(json:JsValue, favFor:String = "") = {
+    (getPhotosCollectionInfo(json), getFavourites(json, favFor)) match {
+      case (Some(info), Some(photos)) => Some((info, photos))
+      case (_, _) => None
+    }
+  }
+
+  def getContactsWithCollectionInfo(json:JsValue, contactsOf:String = "") = {
+    (getContactsCollectionInfo(json), getContacts(json, contactsOf)) match {
+      case (Some(info), Some(contacts)) => Some((info, contacts))
+      case (_, _) => None
     }
   }
 

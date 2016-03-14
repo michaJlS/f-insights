@@ -124,4 +124,20 @@ object JsonWriters
     }
   }
 
+  lazy val userContact = {
+    new Writes[Contact] {
+      def writes(contact: Contact) = Json.obj(
+        "nsid" -> contact.nsid,
+        "username" -> contact.username,
+        "contactOf" -> contact.contactOf
+      )
+    }
+  }
+
+  lazy val userContacts = {
+    new Writes[Seq[Contact]] {
+      def writes(contacts: Seq[Contact]) = JsArray(contacts.map(userContact.writes(_)).toSeq)
+    }
+  }
+
 }

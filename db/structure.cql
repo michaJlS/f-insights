@@ -23,6 +23,14 @@ CREATE TYPE photo_urls (
     large varchar
 );
 
+CREATE TABLE contacts (
+    dashboard_id uuid,
+    contact_of varchar,
+    nsid varchar,
+    username varchar,
+    PRIMARY KEY ((dashboard_id), contact_of, nsid)
+);
+
 CREATE TABLE favourites (
     dashboard_id uuid,
     photo_id varchar,

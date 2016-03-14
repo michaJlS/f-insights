@@ -1,5 +1,6 @@
 package models.flickr
 
+import scala.collection.immutable.IndexedSeq
 import scala.concurrent.{ExecutionContext, Future}
 
 trait Repository
@@ -9,8 +10,11 @@ trait Repository
 
   def getUserPublicFavorites(nsid:String, token:UserToken, page:Int=1, perpage:Int=500,
                              favedBefore:Option[String] = None,
-                             favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[(CollectionInfo, Seq[Favourite])]]
+                             favedAfter:Option[String] = None)(implicit executor:ExecutionContext)
+        :Future[Option[(CollectionInfo, Seq[Favourite])]]
 
+  def getUserPublicContacts(nsid: String, token:UserToken, page: Int = 1, perpage: Int = 1000)(implicit executor:ExecutionContext)
+        : Future[Option[(CollectionInfo, Seq[Contact])]]
 
   def getAllUserPublicFavoritesSequentially(nsid:String, token:UserToken, favedBefore:Option[String] = None, favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[Seq[Favourite]]] = {
     def load(page:Int, all:Seq[Favourite] = Seq[Favourite]()):Future[Option[Seq[Favourite]]] = {
@@ -29,9 +33,11 @@ trait Repository
     load(1)
   }
 
-  def getAllUserPublicFavoritesParallely(nsid:String, token:UserToken, favedBefore:Option[String] = None, favedAfter:Option[String] = None)(implicit executor:ExecutionContext):Future[Option[Seq[Favourite]]] = {
-    getUserPublicFavorites(nsid, token, 1, 500, favedBefore, favedAfter) flatMap { res =>
-      res match {
+  def getAllUserPublicFavoritesParallely(nsid:String, token:UserToken, favedBefore:Option[String] = None, favedAfter:Option[String] = None)(implicit executor:ExecutionContext)
+        :Future[Option[Seq[Favourite]]] = {
+
+    getUserPublicFavorites(nsid, token, 1, 500, favedBefore, favedAfter).
+      flatMap {
         case Some((info, photos)) => {
 
           val ps = for {
@@ -48,6 +54,28 @@ trait Repository
         }
         case _ => Future {None}
       }
+
+  }
+
+  def getAllUserPublicContacts(nsid:String, token:UserToken)(implicit executor:ExecutionContext):Future[Option[Seq[Contact]]] = {
+
+    getUserPublicContacts(nsid, token, 1, 1000).
+      flatMap {
+        case Some((info, contacts)) => {
+
+          val ps = for {
+            i <- Range(2, info.pages + 1)
+          } yield getUserPublicContacts(nsid, token, i, 1000).map(_.map(_._2))
+
+          Future
+            .sequence((ps :+ Future {Some(contacts)}).toSeq)
+            .map(s => if (s.contains(None)) None else Some(s))
+            .map(_ match {
+              case Some(s) => Some(s.map(_.get).flatten)
+              case _ => None
+            })
+        }
+        case _ => Future {None}
     }
   }
 

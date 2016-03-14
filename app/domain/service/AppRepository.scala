@@ -1,15 +1,11 @@
 package domain.service
 
 
-
 import java.util.UUID
-import models.flickr.{AppUserDetail, Favourite, Dashboard}
+import models.flickr.{Contact, AppUserDetail, Favourite, Dashboard}
 import scala.concurrent.{ExecutionContext, Future}
 
 
-/**
-  * Created by michalsznurawa on 12/03/16.
-  */
 trait AppRepository
 {
 
@@ -34,13 +30,11 @@ trait AppRepository
 
   /**
     * @throws Exception
-    * @param dashboard_id
+    * @param dashboardId
     * @param favs
     * @return
     */
-  def insertFavourties(dashboard_id: UUID, favs: Seq[Favourite])(implicit executor:ExecutionContext) = {
-    Future.sequence(favs.map(insertFavourite(dashboard_id, _))).map(_ => true)
-  }
+  def insertFavourties(dashboardId: UUID, favs: Seq[Favourite])(implicit executor:ExecutionContext) = Future.sequence(favs.map(insertFavourite(dashboardId, _))).map(_ => true)
 
   def getFavouritesByDashboardId(dashboard_id: UUID)(implicit executor:ExecutionContext): Future[List[Favourite]]
 
@@ -48,5 +42,10 @@ trait AppRepository
 
   def getUserDetail(nsid: String, key: String)(implicit executor:ExecutionContext): Future[Option[AppUserDetail]]
 
-}
+  def insertContact(dashboardId:UUID, contact:Contact)(implicit executor:ExecutionContext): Future[Boolean]
 
+  def insertContacts(dashboardId:UUID, contacts:Seq[Contact])(implicit executor:ExecutionContext) = Future.sequence(contacts.map(insertContact(dashboardId, _))).map(_ => true)
+
+  def getContactsByDashboardId(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[Contact]]
+
+}

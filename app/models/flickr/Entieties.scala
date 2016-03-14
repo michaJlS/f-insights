@@ -14,6 +14,8 @@ case class UserInfo(id:String, nsid:String, username: String, fullname: String, 
 
 case class AppUserDetail(nsid:String, detail_key:String, detail_value:String)
 
+case class Contact(nsid:String, username:String, contactOf:String)
+
 case class PhotoExcerpt(id:String, title:String, owner:String, owner_name:String, date_upload:String, date_taken:String, count_views:Int, count_faves:Int, count_comments:Int, tags:String, machine_tags:String, urls:PhotoUrls)
 {
 

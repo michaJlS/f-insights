@@ -2,7 +2,6 @@ package infrastructure.cassandra.table
 
 import com.websudos.phantom.dsl._
 import models.flickr.AppUserDetail
-
 import scala.concurrent.Future
 
 
