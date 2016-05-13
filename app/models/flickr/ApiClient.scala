@@ -103,4 +103,17 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey)
     doRequest(h, calc(token)).map(getJson)
   }
 
+  def getUserPublicContacts(nsid:String, token: UserToken, page:Int = 1, perpage:Int = 1000)(implicit executor:ExecutionContext) = {
+
+    val qp = Map(
+      "user_id" -> nsid,
+      "page" -> page.toString,
+      "per_page" -> perpage.toString
+    )
+
+    val h = setQueryParams(qp) _ compose setApiMethod("flickr.contacts.getPublicList")
+
+    doRequest(h, calc(token)).map(getJson)
+  }
+
 }
