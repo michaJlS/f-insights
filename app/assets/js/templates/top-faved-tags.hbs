@@ -1,4 +1,4 @@
-<h2>Most faved tags</h2>
+<h2>Faved tags</h2>
 <table class="table table-striped">
     <thead>
     <tr>
@@ -9,7 +9,7 @@
     <tbody>
     {{#each tags}}
         <tr>
-            <td>{{tag}}</td>
+            <td><strong>{{tag}}</strong></td>
             <td>{{count}}</td>
         </tr>
         <tr>
@@ -22,3 +22,4 @@
     {{/each}}
     </tbody>
 </table>
+<p><a href="#" class="moar">Show more ...</a></p>

@@ -1,4 +1,5 @@
-<h2>Most faved authors</h2>
+
+<h2>Faved authors <a href="#" class="non-contacts">Show only non-contacts</a></h2>
 <table class="table table-striped">
     <thead>
     <tr>
@@ -9,7 +10,7 @@
     <tbody>
         {{#each owners}}
         <tr>
-            <td><a href="https://www.flickr.com/photos/{{owner}}/" target="_blank"><img src="http://flickr.com/buddyicons/{{owner}}.jpg"> {{owner_name}}</a></td>
+            <td><a href="https://www.flickr.com/photos/{{owner}}/" target="_blank"><img src="http://flickr.com/buddyicons/{{owner}}.jpg"> <strong>{{owner_name}}</strong></a></td>
             <td>{{count}}</td>
         </tr>
         <tr>
@@ -22,3 +23,4 @@
         {{/each}}
     </tbody>
 </table>
+<p><a href="#" class="moar">Show more ...</a></p>
