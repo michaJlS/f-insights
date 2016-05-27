@@ -1,21 +1,18 @@
 name := "flickr-assistant"
 
-version := "0.1"
+version := "0.2"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, SbtWeb)
 
-scalaVersion := "2.10.6"
+scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-  jdbc,
   cache,
   ws,
   specs2 % Test
 )
 
-
 pipelineStages := Seq(digest)
-
 
 val PhantomVersion = "1.22.0"
 

@@ -1,14 +1,11 @@
 package controllers
 
-import java.util.UUID
-import javax.inject.Inject
-
-import domain.service.DashboardService
-import models.flickr._
 import controllers.actions._
-import org.joda.time.DateTime
-import play.api.Play._
-import play.api._
+import domain.service.DashboardService
+import infrastructure.cassandra.FlickrAssistantDb
+import models.flickr._
+
+import javax.inject.Inject
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WSClient
@@ -17,11 +14,10 @@ import play.api.mvc._
 import scala.concurrent.Future
 
 
-class Api @Inject() (apiClient: WSClient) extends Controller with Flickr with Db
+class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiRepository) extends Controller
 {
 
   val context = defaultContext
-  val repository = apiRepository(apiClient)
   val dashboardService = new DashboardService(db)
   val stats = new Stats
 

@@ -3,23 +3,21 @@ package controllers
 import java.util.Calendar
 import javax.inject.Inject
 
-import models.flickr.UserToken
+import models.flickr.{ApiRepository, UserToken}
 import play.api._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import play.api.Play._
 
-
 import scala.concurrent.Future
 
 
-class Application @Inject() (apiClient: WSClient) extends Controller with Base with Flickr
+class Application @Inject() (apiClient: WSClient, repository: ApiRepository) extends Controller with Base
 {
 
 
   val context = defaultContext
-  val repository = apiRepository(apiClient)
 
   def index = Action.async { implicit request => {
     val token = getRequestToken("access")

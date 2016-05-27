@@ -1,12 +1,13 @@
 package controllers
 
+import com.google.inject.Inject
+import com.google.inject.name.Named
 import play.api._
+import play.api.libs.oauth.OAuth
 import play.api.mvc._
 
-/**
- *
- */
-class Auth extends Controller with Base with Flickr
+
+class Auth @Inject()(@Named("FlickrOAuth") oauth:OAuth) extends Controller with Base
 {
 
   def login = Action { implicit request =>
