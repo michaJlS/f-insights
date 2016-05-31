@@ -1,3 +1,4 @@
+# ubuntu 1404
 dependencies:
   override:
     - wget -q https://dl.bintray.com/sbt/debian/sbt-0.13.11.deb
