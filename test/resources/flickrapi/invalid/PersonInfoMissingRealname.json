@@ -1,0 +1,54 @@
+{
+  "person" : {
+    "id" : "27552342@N02",
+    "nsid" : "27552342@N02",
+    "ispro" : 1,
+    "can_buy_pro" : 0,
+    "iconserver" : "5585",
+    "iconfarm" : 6,
+    "path_alias" : "michajls",
+    "has_stats" : "1",
+    "expire" : "0",
+    "username" : {
+      "_content" : "michaJlS"
+    },
+    "mbox_sha1sum" : {
+      "_content" : "5072930a05cc3f8a0403e5a3476981d732fddace"
+    },
+    "location" : {
+      "_content" : "London"
+    },
+    "timezone" : {
+      "label" : "GMT: Dublin, Edinburgh, Lisbon, London",
+      "offset" : "+00:00",
+      "timezone_id" : "Europe/London"
+    },
+    "description" : {
+      "_content" : "I'm an amateur photographer"
+    },
+    "photosurl" : {
+      "_content" : "https://www.flickr.com/photos/michajls/"
+    },
+    "profileurl" : {
+      "_content" : "https://www.flickr.com/people/michajls/"
+    },
+    "mobileurl" : {
+      "_content" : "https://m.flickr.com/photostream.gne?id=27531994"
+    },
+    "photos" : {
+      "firstdatetaken" : {
+        "_content" : "2009-06-09 22:06:40"
+      },
+      "firstdate" : {
+        "_content" : "1360698043"
+      },
+      "count" : {
+        "_content" : 169
+      },
+      "views" : {
+        "_content" : "2480"
+      }
+    }
+  },
+  "stat" : "ok"
+}

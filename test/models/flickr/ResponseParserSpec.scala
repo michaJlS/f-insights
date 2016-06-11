@@ -4,30 +4,30 @@ import org.specs2.mutable._
 import org.specs2.runner._
 import org.junit.runner._
 import play.api.libs.json._
-
 import play.api.test._
 import play.api.test.Helpers._
+import test.Resources
 
 
 @RunWith(classOf[JUnitRunner])
-class ResponseParserSpec extends Specification
+class ResponseParserSpec extends Specification with Resources
 {
 
   val parser = new ResponseParser
 
-  val emptyString = Json.parse(SampleInvalidResponses.emptyString)
-  val invalidJson = Json.parse(SampleInvalidResponses.dummy)
-  val tokenInfoMissingNsid = Json.parse(SampleInvalidResponses.tokeInfoNoNsid)
-  val validTokenInfo = Json.parse(SampleValidResponses.tokenInfo)
-  val personInfoMissingRealname = Json.parse(SampleInvalidResponses.personInfoMissingRealname)
-  val validPersonInfo = Json.parse(SampleValidResponses.personInfo)
-  val emptyPhotosList = Json.parse(SampleValidResponses.emptyPhotosList)
-  val emptyPhotosListMissingTotal = Json.parse(SampleInvalidResponses.emptyPhotosListMissingTotal)
-  val emptyPhotosListObjInsteadArray = Json.parse(SampleInvalidResponses.emptyPhotosListObjInsteadArray)
-  val favsPhotosList = Json.parse(SampleValidResponses.favs)
-  val photoExcerptMissingId = Json.parse(SampleInvalidResponses.photoExcerptMissingId)
-  val photoExcerptMissingTitle = Json.parse(SampleInvalidResponses.photoExcerptMissingTitle)
-  val favsJustOneOk = Json.parse(SampleInvalidResponses.favsJustOneOk)
+  val emptyString = jsonResource("/json/EmptyString.json")
+  val invalidJson = jsonResource("/json/SampleObject.json")
+  val tokenInfoMissingNsid = jsonResource("/flickrapi/invalid/TokeInfoNoNsid.json")
+  val validTokenInfo = jsonResource("/flickrapi/valid/TokenInfo.json")
+  val personInfoMissingRealname = jsonResource("/flickrapi/invalid/PersonInfoMissingRealname.json")
+  val validPersonInfo = jsonResource("/flickrapi/valid/PersonInfo.json")
+  val emptyPhotosList = jsonResource("/flickrapi/valid/EmptyPhotoList.json")
+  val emptyPhotosListMissingTotal = jsonResource("/flickrapi/invalid/EmptyPhotosListMissingTotal.json")
+  val emptyPhotosListObjInsteadArray = jsonResource("/flickrapi/invalid/EmptyPhotosListObjInsteadArray.json")
+  val favsPhotosList = jsonResource("/flickrapi/valid/Favs.json")
+  val photoExcerptMissingId = jsonResource("/flickrapi/invalid/PhotoExcerptMissingId.json")
+  val photoExcerptMissingTitle = jsonResource("/flickrapi/invalid/PhotoExcerptMissingTitle.json")
+  val favsJustOneOk = jsonResource("/flickrapi/invalid/FavsJustOneOk.json")
 
 
   "ResponseParser#getTokenInfo()" should {

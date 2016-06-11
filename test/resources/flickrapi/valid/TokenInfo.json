@@ -1,0 +1,16 @@
+{
+  "oauth" : {
+    "token" : {
+      "_content" : "11111111111111111-2222222222222222"
+    },
+    "perms" : {
+      "_content" : "write"
+    },
+    "user" : {
+      "nsid" : "27552342@N02",
+      "username" : "michaJlS",
+      "fullname" : "Michal Sznurawa"
+    }
+  },
+  "stat" : "ok"
+}
