@@ -3,7 +3,7 @@ package controllers.actions
 import play.api.mvc._
 import scala.concurrent.Future
 
-class CheckNsid(nsid:String) extends  ActionFilter[Request]
+class CheckNsid(nsid:String) extends ActionFilter[Request]
 {
 
   def filter[A](request: Request[A]) = Future.successful {
