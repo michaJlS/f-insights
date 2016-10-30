@@ -1,8 +1,6 @@
 package infrastructure.flickr
 
-import domain._
 import domain.entities._
-import models.flickr._
 
 import scala.concurrent.{ExecutionContext, Future}
 

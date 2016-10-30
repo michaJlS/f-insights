@@ -1,13 +1,9 @@
-package models.flickr
+package infrastructure.json
 
 import domain.entities.{CollectionInfo, TokenInfo, UserInfo}
-import infrastructure.json.ResponseParser
+import org.junit.runner._
 import org.specs2.mutable._
 import org.specs2.runner._
-import org.junit.runner._
-import play.api.libs.json._
-import play.api.test._
-import play.api.test.Helpers._
 import test.Resources
 
 
