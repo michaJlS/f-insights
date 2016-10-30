@@ -21,27 +21,31 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
   val dashboardService = new DashboardService(db)
   val stats = new Stats
 
+  import JsonWrites._
+
   def userGetInfo(nsid:String) = userActionTpl(nsid).async(implicit request => {
       repository.
         getUserInfo(nsid, request.token).
         map {
-          case Some(ui) =>  Ok(JsonWriters.userInfo.writes(ui))
+          case Some(ui) =>  Ok(Json.toJson(ui))
           case _ => InternalServerError("Error while loading user info.")
         }
     })
 
   def getLastDashboard(nsid: String) = userActionTpl(nsid).async(implicit request => {
-        dashboardService.getLastDashboard(nsid).map({
-          case Some(dashboard) => Ok(JsonWriters.dashboard.writes(dashboard))
-          case None => NotFound("Could not find dashboard")
-        })
+        dashboardService.
+          getLastDashboard(nsid).
+          map {
+            case Some(dashboard) => Ok(Json.toJson[Dashboard](dashboard))
+            case None => NotFound("Could not find dashboard")
+          }
       })
 
   def userGetContacts(nsid: String) = myActionTpl(nsid).async(implicit request => {
         dashboardService.
           getContactsFromLastDashboard(nsid).
           map {
-            case Some(contacts) => Ok(JsonWriters.userContacts.writes(contacts))
+            case Some(contacts) => Ok(Json.toJson(contacts))
             case _ => InternalServerError("Error during fetching contacts.")
           }
       })
@@ -56,7 +60,7 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
             case None => None
           } .
           map {
-            case Some(tagsStats) => Ok(JsonWriters.favsTagsStats.writes(tagsStats))
+            case Some(tagsStats) => Ok(Json.toJson(tagsStats))
             case None => InternalServerError("Error during preparing stats of favs tags")
           }
       })
@@ -73,7 +77,7 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
         case None => None
       } .
       map {
-        case Some(tagsStats) => Ok(JsonWriters.favsOwnersStats.writes(tagsStats))
+        case Some(tagsStats) => Ok(Json.toJson(tagsStats))
         case None => InternalServerError("Error during preparing stats of favs tags")
       }
 
