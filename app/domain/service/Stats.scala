@@ -1,6 +1,6 @@
 package domain.service
 
-import models.flickr.{FavOwnerStats, FavTagStats, Favourite}
+import domain.entities.{FavOwnerStats, FavTagStats, Favourite}
 
 class Stats
 {

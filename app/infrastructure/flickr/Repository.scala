@@ -1,6 +1,9 @@
-package models.flickr
+package infrastructure.flickr
 
-import scala.collection.immutable.IndexedSeq
+import domain._
+import domain.entities._
+import models.flickr._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 trait Repository

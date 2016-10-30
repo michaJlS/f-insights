@@ -4,7 +4,8 @@ import com.google.inject.{AbstractModule, Provides}
 import com.google.inject.name.{Named, Names}
 import com.websudos.phantom.connectors.{KeySpaceBuilder, KeySpaceDef}
 import infrastructure.cassandra.FlickrAssistantDb
-import models.flickr.{ApiClient, ApiRepository, ResponseParser}
+import infrastructure.flickr.{ApiClient, ApiRepository}
+import infrastructure.json.ResponseParser
 import play.api.{Configuration, Environment}
 import play.api.libs.oauth.{ConsumerKey, OAuth, ServiceInfo}
 import play.api.libs.ws.WSClient

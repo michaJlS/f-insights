@@ -2,7 +2,9 @@ package domain.service
 
 
 import java.util.UUID
-import models.flickr.{Contact, AppUserDetail, Favourite, Dashboard}
+
+import domain.entities.{AppUserDetail, Contact, Dashboard, Favourite}
+
 import scala.concurrent.{ExecutionContext, Future}
 
 

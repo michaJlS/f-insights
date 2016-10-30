@@ -1,5 +1,7 @@
 package models.flickr
 
+import domain.entities.{CollectionInfo, TokenInfo, UserInfo}
+import infrastructure.json.ResponseParser
 import org.specs2.mutable._
 import org.specs2.runner._
 import org.junit.runner._

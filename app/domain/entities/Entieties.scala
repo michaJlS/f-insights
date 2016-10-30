@@ -1,6 +1,7 @@
-package models.flickr
+package domain.entities
 
 import java.util.UUID
+
 import org.joda.time.DateTime
 /**
  *

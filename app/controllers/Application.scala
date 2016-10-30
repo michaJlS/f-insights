@@ -3,7 +3,8 @@ package controllers
 import java.util.Calendar
 import javax.inject.Inject
 
-import models.flickr.{ApiRepository, UserToken}
+import domain.entities.UserToken
+import infrastructure.flickr.ApiRepository
 import play.api._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WSClient

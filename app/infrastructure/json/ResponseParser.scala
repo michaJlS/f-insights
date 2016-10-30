@@ -1,7 +1,9 @@
-package models.flickr
+package infrastructure.json
 
+import domain.entities._
 import play.api.libs.json.{JsArray, JsLookupResult, JsValue}
-import scala.util.{Try, Success, Failure}
+
+import scala.util.{Failure, Success, Try}
 
 /**
  *
@@ -13,7 +15,7 @@ class ResponseParser
   val medtiaTypePhoto = "photo"
 
   // sometimes flickr returns numbers as just number, and sometimes it wraps numbers with "", what is interpreted as string by the play json lib
-  // TODO http://alvinalexander.com/scala/scala-2.10-implicit-class-example
+  // TODO go reads...
   private def asOptStringToInt(j: JsLookupResult):Option[Int] = {
     j.asOpt[String].map(s => Try(s.toInt)).flatMap(_ match {
       case Success(i) => Some(i)

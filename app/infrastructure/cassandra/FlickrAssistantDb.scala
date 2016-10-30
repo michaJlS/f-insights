@@ -3,9 +3,9 @@ package infrastructure.cassandra
 import java.util.UUID
 
 import com.websudos.phantom.dsl.{Database, KeySpaceDef}
+import domain.entities.{AppUserDetail, Contact, Dashboard, Favourite}
 import domain.service.AppRepository
 import infrastructure.cassandra.table._
-import models.flickr.{Contact, Favourite, Dashboard, AppUserDetail}
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -2,7 +2,8 @@ package infrastructure.cassandra.table
 
 import com.websudos.phantom.dsl._
 import java.util.UUID
-import models.flickr.Dashboard
+
+import domain.entities.Dashboard
 
 import scala.concurrent.Future
 

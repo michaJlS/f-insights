@@ -1,5 +1,6 @@
-package models.flickr
+package infrastructure.json
 
+import domain.entities._
 import play.api.libs.json._
 
 /**

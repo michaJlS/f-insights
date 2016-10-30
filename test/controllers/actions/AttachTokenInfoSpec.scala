@@ -1,7 +1,8 @@
 package controllers.actions
 
 
-import models.flickr.{ApiRepository, UserToken, TokenInfo}
+import domain.entities.{TokenInfo, UserToken}
+import infrastructure.flickr.ApiRepository
 import org.junit.runner.RunWith
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification

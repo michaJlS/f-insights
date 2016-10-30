@@ -1,6 +1,10 @@
-package models.flickr
+package infrastructure.flickr
 
-import scala.concurrent.{Future, ExecutionContext}
+import domain._
+import domain.entities._
+import infrastructure.json.ResponseParser
+
+import scala.concurrent.{ExecutionContext, Future}
 
 class ApiRepository(apiClient:ApiClient, parser:ResponseParser) extends Repository
 {

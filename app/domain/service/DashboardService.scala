@@ -2,7 +2,7 @@ package domain.service
 
 import java.util.UUID
 
-import models.flickr.{Contact, AppUserDetail, Dashboard, Favourite}
+import domain.entities.{AppUserDetail, Contact, Dashboard, Favourite}
 import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}

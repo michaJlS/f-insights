@@ -2,7 +2,8 @@ package infrastructure.cassandra.table
 
 import com.websudos.phantom.dsl._
 import java.util.UUID
-import models.flickr.{Favourite, PhotoExcerpt, PhotoUrls}
+
+import domain.entities.{Favourite, PhotoExcerpt, PhotoUrls}
 
 
 class Favourites extends CassandraTable[Favourites, Favourite]

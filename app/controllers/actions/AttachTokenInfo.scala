@@ -1,6 +1,6 @@
 package controllers.actions
 
-import models.flickr.ApiRepository
+import infrastructure.flickr.ApiRepository
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}

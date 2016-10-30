@@ -1,7 +1,8 @@
 package controllers.actions
 
-import models.flickr.UserToken
+import domain.entities.UserToken
 import play.api.mvc._
+
 import scala.concurrent.Future
 
 

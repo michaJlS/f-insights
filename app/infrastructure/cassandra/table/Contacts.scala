@@ -2,8 +2,10 @@ package infrastructure.cassandra.table
 
 
 import java.util.UUID
+
 import com.websudos.phantom.dsl._
-import models.flickr.Contact
+import domain.entities.Contact
+
 import scala.concurrent.Future
 
 

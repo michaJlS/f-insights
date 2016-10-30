@@ -1,11 +1,11 @@
-package models.flickr
+package infrastructure.flickr
 
+import domain.entities.UserToken
+import play.api.libs.json.JsValue
+import play.api.libs.oauth.{ConsumerKey, OAuthCalculator, RequestToken}
+import play.api.libs.ws.{WSClient, WSRequest, WSResponse, WSSignatureCalculator}
 
-import play.api.libs.json.{JsValue, Json}
-import play.api.libs.oauth.{OAuthCalculator, RequestToken, ConsumerKey}
-import play.api.libs.ws.{WSSignatureCalculator, WSResponse, WSRequest, WSClient}
-
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * First version. May require refactoring to a few more classes
