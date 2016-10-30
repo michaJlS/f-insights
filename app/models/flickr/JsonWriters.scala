@@ -9,8 +9,7 @@ import play.api.libs.functional.syntax._
 object JsonWriters
 {
 
-  lazy val userInfo = {
-    new Writes[UserInfo] {
+  implicit lazy val userInfo = new Writes[UserInfo] {
       def writes(ui:UserInfo) = {
         Json.obj(
           "id" -> ui.id,
@@ -23,10 +22,8 @@ object JsonWriters
         )
       }
     }
-  }
 
-  lazy val dashboard = {
-    new Writes[Dashboard] {
+  implicit lazy val dashboard =  new Writes[Dashboard] {
       def writes(d:Dashboard) = {
         Json.obj(
           "id" -> d.id.toString,
@@ -35,10 +32,8 @@ object JsonWriters
         )
       }
     }
-  }
 
-  lazy val photoUrls = {
-    new Writes[PhotoUrls] {
+  implicit lazy val photoUrls = new Writes[PhotoUrls] {
       def writes(u:PhotoUrls) = {
         Json.obj(
           "largeSquareThumb" -> u.largeSquareThumb,
@@ -48,12 +43,10 @@ object JsonWriters
         )
       }
     }
-  }
 
   // case class PhotoExcerpt(id:String, title:String, owner:String, owner_name:String, date_upload:String, date_taken:String, count_views:Int, count_faves:Int, count_comments:Int, tags:String, machine_tags:String, urls:PhotoUrls)
 
-  lazy val photoExcerpt = {
-    new Writes[PhotoExcerpt] {
+  implicit lazy val photoExcerpt = new Writes[PhotoExcerpt] {
       def writes(p:PhotoExcerpt) = {
         Json.obj(
           "id" -> p.id,
@@ -69,10 +62,8 @@ object JsonWriters
         )
       }
     }
-  }
-
-  lazy val favourite = {
-    new Writes[Favourite] {
+  
+  implicit lazy val favourite = new Writes[Favourite] {
       def writes(f:Favourite) = {
         Json.obj(
           "date_faved" -> f.date_faved,
@@ -81,34 +72,26 @@ object JsonWriters
         )
       }
     }
-  }
 
-  lazy val favourites = {
-    new Writes[Seq[Favourite]] {
+  implicit lazy val favourites = new Writes[Seq[Favourite]] {
       def writes(c:Seq[Favourite]) = {
         JsArray(c.map(favourite.writes(_)))
       }
     }
-  }
 
-  lazy val favsTagStat = {
-    new Writes[FavTagStats] {
+  implicit lazy val favsTagStat =  new Writes[FavTagStats] {
       def writes(tagStats:FavTagStats) = Json.obj(
         "tag" -> tagStats.tag,
         "count" -> tagStats.count,
         "photos" -> favourites.writes(tagStats.photos)
       )
     }
-  }
 
-  lazy val favsTagsStats = {
-    new Writes[Seq[FavTagStats]] {
+  implicit lazy val favsTagsStats = new Writes[Seq[FavTagStats]] {
       def writes(stats:Seq[FavTagStats]) = JsArray(stats.map(favsTagStat.writes(_)).toSeq)
     }
-  }
 
-  lazy val favsOwnerStats = {
-    new Writes[FavOwnerStats] {
+  implicit lazy val favsOwnerStats = new Writes[FavOwnerStats] {
       def writes(ownerStats:FavOwnerStats) = Json.obj(
         "owner" -> ownerStats.owner,
         "owner_name" -> ownerStats.owner_name,
@@ -116,28 +99,21 @@ object JsonWriters
         "photos" -> favourites.writes(ownerStats.photos)
       )
     }
-  }
 
-  lazy val favsOwnersStats = {
-    new Writes[Seq[FavOwnerStats]] {
+  implicit lazy val favsOwnersStats =  new Writes[Seq[FavOwnerStats]] {
       def writes(stats: Seq[FavOwnerStats]) = JsArray(stats.map(favsOwnerStats.writes(_)).toSeq)
     }
-  }
 
-  lazy val userContact = {
-    new Writes[Contact] {
+  implicit lazy val userContact = new Writes[Contact] {
       def writes(contact: Contact) = Json.obj(
         "nsid" -> contact.nsid,
         "username" -> contact.username,
         "contactOf" -> contact.contactOf
       )
     }
-  }
 
-  lazy val userContacts = {
-    new Writes[Seq[Contact]] {
+  implicit lazy val userContacts = new Writes[Seq[Contact]] {
       def writes(contacts: Seq[Contact]) = JsArray(contacts.map(userContact.writes(_)).toSeq)
     }
-  }
 
 }

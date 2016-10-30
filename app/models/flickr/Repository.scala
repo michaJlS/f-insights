@@ -20,10 +20,10 @@ trait Repository
     def load(page:Int, all:Seq[Favourite] = Seq[Favourite]()):Future[Option[Seq[Favourite]]] = {
       getUserPublicFavorites(nsid, token, page, 500, favedBefore, favedAfter).flatMap(
         _ match  {
-          case None => Future {None}
+          case None => Future.successful {None}
           case Some((info, c)) =>
             if (page >= info.pages) {
-              Future {Some(all ++ c)}
+              Future.successful {Some(all ++ c)}
             } else {
               load(page + 1, all ++ c)
             }
@@ -52,7 +52,7 @@ trait Repository
               case _ => None
             })
         }
-        case _ => Future {None}
+        case _ => Future.successful {None}
       }
 
   }
@@ -75,7 +75,7 @@ trait Repository
               case _ => None
             })
         }
-        case _ => Future {None}
+        case _ => Future.successful {None}
     }
   }
 

@@ -22,7 +22,7 @@ class DashboardService(appRepository: AppRepository)
       getUserDetail(nsid, DashboardService.dashboard_property_name).
       flatMap {
         case Some(detail) => appRepository.getDashboard(nsid, detail.detail_value)
-        case None => Future {None}
+        case None => Future.successful {None}
       }
   }
 
@@ -43,7 +43,7 @@ class DashboardService(appRepository: AppRepository)
     getLastDashboard(nsid).
       flatMap({
         case Some(dashboard) => appRepository.getFavouritesByDashboardId(dashboard.id).map((favs:List[Favourite]) => Some(favs))
-        case _ => Future {None}
+        case _ => Future.successful {None}
       })
   }
 
@@ -51,7 +51,7 @@ class DashboardService(appRepository: AppRepository)
     getLastDashboard(nsid).
       flatMap({
         case Some(dashboard) => appRepository.getContactsByDashboardId(dashboard.id).map((contacts:List[Contact]) => Some(contacts))
-        case _ => Future {None}
+        case _ => Future.successful {None}
       })
   }
 

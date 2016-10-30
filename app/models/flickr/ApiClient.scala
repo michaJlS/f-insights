@@ -13,6 +13,62 @@ import scala.concurrent.{Future, ExecutionContext}
 class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey)
 {
 
+
+  def checkToken(token: UserToken)(implicit executor:ExecutionContext):Future[Option[JsValue]] = {
+    val response = doRequest(setApiMethod("flickr.auth.oauth.checkToken"), calc(token))
+    response.map(getJson)
+  }
+
+  def getUserInfo(nsid:String, token: UserToken)(implicit executor:ExecutionContext):Future[Option[JsValue]] = {
+    val h = setQueryParams(Map("user_id" -> nsid)) _ compose setApiMethod("flickr.people.getInfo")
+    doRequest(h, calc(token)).map(getJson)
+  }
+
+  /**
+    *
+    * @param nsid
+    * @param page
+    * @param perpage max 500
+    * @param favedBefore
+    * @param favedAfter
+    * @return
+    */
+  def getUserPublicFavorites(
+                              nsid:String,
+                              token: UserToken,
+                              page:Int = 1,
+                              perpage:Int = 500,
+                              favedBefore:Option[String] = None,
+                              favedAfter:Option[String] = None)
+                            (implicit executor:ExecutionContext):Future[Option[JsValue]] = {
+
+    val qp = Map(
+      "user_id" -> nsid,
+      "page" -> page.toString,
+      "per_page" -> perpage.toString,
+      "extras" ->
+        "owner_name,date_upload,date_taken,tags,machine_tags,views,media,count_faves,count_comments,url_q,url_m,url_z,url_l")
+
+    val optional = Map("min_fave_date" -> favedAfter, "max_fave_date" -> favedBefore)
+    val h = setQueryParams(qp) _ compose setApiMethod("flickr.favorites.getPublicList") _ compose setOptionalParams(optional)
+
+    doRequest(h, calc(token)).map(getJson)
+  }
+
+  def getUserPublicContacts(nsid:String, token: UserToken, page:Int = 1, perpage:Int = 1000)(implicit executor:ExecutionContext) = {
+
+    val qp = Map(
+      "user_id" -> nsid,
+      "page" -> page.toString,
+      "per_page" -> perpage.toString
+    )
+
+    val h = setQueryParams(qp) _ compose setApiMethod("flickr.contacts.getPublicList")
+
+    doRequest(h, calc(token)).map(getJson)
+  }
+
+
   private def getRequest:WSRequest = {
     apiClient
       .url(url)
@@ -60,60 +116,6 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey)
 
   private def calc(token: UserToken) = {
     OAuthCalculator(consumerKey, RequestToken(token.token, token.secret))
-  }
-
-  def checkToken(token: UserToken)(implicit executor:ExecutionContext):Future[Option[JsValue]] = {
-    val response = doRequest(setApiMethod("flickr.auth.oauth.checkToken"), calc(token))
-    response.map(getJson)
-  }
-
-  def getUserInfo(nsid:String, token: UserToken)(implicit executor:ExecutionContext):Future[Option[JsValue]] = {
-    val h = setQueryParams(Map("user_id" -> nsid)) _ compose setApiMethod("flickr.people.getInfo")
-    doRequest(h, calc(token)).map(getJson)
-  }
-
-  /**
-   *
-   * @param nsid
-   * @param page
-   * @param perpage max 500
-   * @param favedBefore
-   * @param favedAfter
-   * @return
-   */
-  def getUserPublicFavorites(
-        nsid:String,
-        token: UserToken,
-        page:Int = 1,
-        perpage:Int = 500,
-        favedBefore:Option[String] = None,
-        favedAfter:Option[String] = None)
-      (implicit executor:ExecutionContext):Future[Option[JsValue]] = {
-
-    val qp = Map(
-      "user_id" -> nsid,
-      "page" -> page.toString,
-      "per_page" -> perpage.toString,
-      "extras" ->
-        "owner_name,date_upload,date_taken,tags,machine_tags,views,media,count_faves,count_comments,url_q,url_m,url_z,url_l")
-
-    val optional = Map("min_fave_date" -> favedAfter, "max_fave_date" -> favedBefore)
-    val h = setQueryParams(qp) _ compose setApiMethod("flickr.favorites.getPublicList") _ compose setOptionalParams(optional)
-
-    doRequest(h, calc(token)).map(getJson)
-  }
-
-  def getUserPublicContacts(nsid:String, token: UserToken, page:Int = 1, perpage:Int = 1000)(implicit executor:ExecutionContext) = {
-
-    val qp = Map(
-      "user_id" -> nsid,
-      "page" -> page.toString,
-      "per_page" -> perpage.toString
-    )
-
-    val h = setQueryParams(qp) _ compose setApiMethod("flickr.contacts.getPublicList")
-
-    doRequest(h, calc(token)).map(getJson)
   }
 
 }

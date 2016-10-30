@@ -1,0 +1,2 @@
+FROM cassandra:3.9
+ENV CASSANDRA_CLUSTER_NAME=FlickrAssistant

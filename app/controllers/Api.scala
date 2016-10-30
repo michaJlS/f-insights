@@ -1,11 +1,11 @@
 package controllers
 
 import controllers.actions._
-import domain.service.DashboardService
+import domain.service.{DashboardService, Stats}
 import infrastructure.cassandra.FlickrAssistantDb
 import models.flickr._
-
 import javax.inject.Inject
+
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WSClient
@@ -81,7 +81,7 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
 
 
   def statsUserTags(nsid:String) = Action.async( implicit request => {
-    Future {InternalServerError("Not yet implemented") }
+    Future.successful {InternalServerError("Not yet implemented") }
   } )
 
 
@@ -95,7 +95,7 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
       data.
         flatMap({
           case (Some(favs), Some(contacts)) => dashboardService.buildNewDashboard(nsid, favs, contacts)
-          case (_, _) => Future {None}
+          case (_, _) => Future.successful {None}
         }).
         map({
           case Some(dashboardId) => Ok("ok")

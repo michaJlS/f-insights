@@ -31,12 +31,12 @@ class Application @Inject() (apiClient: WSClient, repository: ApiRepository) ext
         })
 
     } else {
-      Future {TemporaryRedirect(routes.Auth.login.absoluteURL)}
+      Future.successful {TemporaryRedirect(routes.Auth.login.absoluteURL)}
     }
   } }
 
   def test = Action.async( implicit request => {
-   Future { Ok("nanana") }
+    Future.successful { Ok("nanana") }
   } )
 
 
