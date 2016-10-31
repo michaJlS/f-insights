@@ -1,6 +1,6 @@
 /*!
- * backbone.layoutmanager.js v0.10.0
- * Copyright 2015, Tim Branyen (@tbranyen)
+ * backbone.layoutmanager.js v1.0.0
+ * Copyright 2016, Tim Branyen (@tbranyen)
  * backbone.layoutmanager.js may be freely distributed under the MIT license.
  */
 (function(window, factory) {
@@ -1134,7 +1134,7 @@ var defaultOptions = {
     var vendors = ["ms", "moz", "webkit", "o"];
     var cancelAnimationFrame = window.cancelAnimationFrame;
 
-    for (var i = 0; i < vendors.length && !window.requestAnimationFrame; ++i) {
+    for (var i = 0; i < vendors.length && !window.cancelAnimationFrame; ++i) {
       cancelAnimationFrame =
         window[vendors[i] + "CancelAnimationFrame"] ||
         window[vendors[i] + "CancelRequestAnimationFrame"];

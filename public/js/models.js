@@ -2,7 +2,29 @@
 
 FlickrAssistant.Models.Dashboard = FlickrAssistant.Model.extend({
     "urlRoot": "api/dashboard",
-    "idAttribute": "nsid"
+    "idAttribute": "nsid",
+    forceCreate: function(options = null) {
+        var o = new FlickrAssistant.Models.Dashboard({nsid: this.nsid});
+        o.isNew = function() {return true;};
+        o.save(options);
+    },
+    createNew: function(options) {
+        this.sync("create", this, options);
+    },
+    fetchWithFallback: function() {
+        // TODO pass options to create new, somehow
+        // and refresh other boxes
+        this.fetch({
+            error: (function() {
+                this.createNew({
+                    success: (function() {
+
+                        this.fetch();
+                     }).bind(this)
+                });
+            }).bind(this)
+        });
+    }
 });
 
 
@@ -17,10 +39,7 @@ FlickrAssistant.Collections.UserInfo = FlickrAssistant.Collection.extend({
 });
 
 FlickrAssistant.Models.StatsFavTag = FlickrAssistant.ModelReadOnly.extend({
-    "idAttribute": "tag",
-    initialize: function (attributes, options) {
-        this.set("topphotos", this.get("photos").slice(0, Math.min(3, this.get("photos").length)))
-    }
+    "idAttribute": "tag"
 });
 
 FlickrAssistant.Collections.StatsFavTag = FlickrAssistant.CollectionReadOnly.extend({

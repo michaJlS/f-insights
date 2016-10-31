@@ -29,7 +29,7 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
         getUserInfo(nsid, request.token).
         map {
           case Some(ui) =>  Ok(Json.toJson(ui))
-          case _ => InternalServerError("Error while loading user info.")
+          case _ => InternalServerError(Json.toJson("Error while loading user info."))
         }
     })
 
@@ -38,7 +38,7 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
           getLastDashboard(nsid).
           map {
             case Some(dashboard) => Ok(Json.toJson[Dashboard](dashboard))
-            case None => NotFound("Could not find dashboard")
+            case None => NotFound(Json.toJson("Could not find dashboard"))
           }
       })
 
@@ -47,7 +47,7 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
           getContactsFromLastDashboard(nsid).
           map {
             case Some(contacts) => Ok(Json.toJson(contacts))
-            case _ => InternalServerError("Error during fetching contacts.")
+            case _ => InternalServerError(Json.toJson("Error during fetching contacts."))
           }
       })
 
@@ -62,7 +62,7 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
           } .
           map {
             case Some(tagsStats) => Ok(Json.toJson(tagsStats))
-            case None => InternalServerError("Error during preparing stats of favs tags")
+            case None => InternalServerError(Json.toJson("Error during preparing stats of favs tags"))
           }
       })
 
@@ -73,18 +73,18 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
     dashboardService.
       getFavouritesFromLastDashboard(nsid).
       map {
-        case Some(favs) => Some(stats.favsOwnersStats(favs))
-        case None => None
+        case Some(favs) => Some(stats.favsOwnersStats(favs, threshold))
+        case _ => None
       } .
       map {
         case Some(tagsStats) => Ok(Json.toJson(tagsStats))
-        case None => InternalServerError("Error during preparing stats of favs tags")
+        case _ => InternalServerError(Json.toJson("Error during preparing stats of favs tags"))
       }
 
   } )
 
   def statsUserTags(nsid:String) = Action.async( implicit request => {
-    Future.successful {InternalServerError("Not yet implemented") }
+    Future.successful {InternalServerError(Json.toJson("Not yet implemented")) }
   } )
 
 
@@ -98,11 +98,11 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
       data.
         flatMap({
           case (Some(favs), Some(contacts)) => dashboardService.buildNewDashboard(nsid, favs, contacts)
-          case (_, _) => Future.successful {None}
+          case _ => Future.successful {None}
         }).
         map({
-          case Some(dashboardId) => Ok("ok")
-          case _ => InternalServerError("Something went wrong.")
+          case Some(dashboardId) => Created(Json.toJson("ok"))
+          case _ => InternalServerError(Json.toJson("Something went wrong."))
         })
 
   })

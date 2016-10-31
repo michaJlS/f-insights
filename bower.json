@@ -7,9 +7,10 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "backbone": "~1.1",
-    "layoutmanager": "~0.10.0",
-    "jquery": "~2.1.4",
+    "underscore": "~1.8",
+    "backbone": "~1.2",
+    "layoutmanager": "~1.0",
+    "jquery": "~3.1",
     "handlebars": "~4.0.5",
     "bootstrap": "~3.3"
   },
