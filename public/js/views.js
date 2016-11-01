@@ -1,59 +1,92 @@
 FlickrAssistant.Views.TopFavedAuthors = FlickrAssistant.BaseView.extend({
     owners: null,
-    contacts: null,
+    ownersNoContacts: null,
     nonContacts: false,
+    page: 0,
     template: "top-faved-authors",
     events: {
         "click .non-contacts": "switchToNonContacts",
-        "click .remove-contacts-filter": "removeContactsFilter"
+        "click .remove-contacts-filter": "removeContactsFilter",
+        "click .moar": "onAddPage"
+    },
+    onAddPage: function(e) {
+        e.stopImmediatePropagation();
+        this.addPage();
+        return false;
     },
     initialize: function () {
-        this.contacts = new FlickrAssistant.Collections.Contact(null, {"nsid": FlickrAssistant.Context.nsid});
         this.owners = new FlickrAssistant.Collections.StatsFavOwner(null, {"nsid": FlickrAssistant.Context.nsid});
-        // TODO redundant with header ... share somehow
-        this.contacts.fetch();
+        this.ownersNoContacts = new FlickrAssistant.Collections.StatsFavOwner(null, {"nsid": FlickrAssistant.Context.nsid});
         this.owners.fetch({
-            success: this.render.bind(this)
+            success: this.addPage.bind(this),
+            data: {threshold: 5}
         });
+        this.ownersNoContacts.fetch({data:{non_contacts: true}});
     },
     removeContactsFilter: function(e) {
         e.stopImmediatePropagation();
         this.nonContacts = false;
+        this.page = 0;
         this.render();
+        this.addPage();
         return false;
     },
     switchToNonContacts: function(e) {
         e.stopImmediatePropagation();
         this.nonContacts = true;
+        this.page = 0;
         this.render();
+        this.addPage();
         return false;
     },
+    addPage: function() {
+        var from = function(x) { return 10 * (x-1); },
+            to = function(x) { return 10 * x; },
+            data = this.nonContacts ? this.ownersNoContacts : this.owners,
+            child = null, dataJson = null;
+
+        if (to(this.page) >= data.length) {
+            return false;
+        }
+        ++this.page;
+        dataJson = data.toJSON().slice(from(this.page), to(this.page));
+        child = new FlickrAssistant.Views.FavedAuthorsList({
+            owners: dataJson
+        });
+        this.setView(".pages", child, true);
+        child.render();
+    },
     serialize: function () {
-         var json = this.owners.toJSON();
-         var contactsIds = this.contacts.pluck("nsid");
-         if (this.nonContacts) {
-            json = json.filter(function(obj) {
-                return -1 === contactsIds.indexOf(obj.owner)
-            });
-         }
          return {
-             owners: json.slice(0, 10),
              nonContacts: this.nonContacts
          };
     }
 });
-FlickrAssistant.Views.FavedTagsList = FlickrAssistant.BaseView.extend({
-    template: "faved-tags-list",
-    tags: [],
-    initialize: function (options) {
-        this.tags = options.tags
-    },
-    serialize: function () {
-        return {
-            tags: this.tags
-        }
-    }
+FlickrAssistant.Views.FavedAuthorsList = FlickrAssistant.BaseView.extend({
+     template: "faved-authors-list",
+     owners: [],
+     initialize: function (options) {
+         this.owners = options.owners
+     },
+     serialize: function () {
+         return {
+             owners: this.owners
+         }
+     }
 });
+
+FlickrAssistant.Views.FavedTagsList = FlickrAssistant.BaseView.extend({
+     template: "faved-tags-list",
+     tags: [],
+     initialize: function (options) {
+         this.tags = options.tags
+     },
+     serialize: function () {
+         return {
+             tags: this.tags
+         }
+     }
+ });
 FlickrAssistant.Views.TopFavedTags = FlickrAssistant.BaseView.extend({
     template: "top-faved-tags",
     tags: [],
@@ -90,12 +123,6 @@ FlickrAssistant.Views.TopFavedTags = FlickrAssistant.BaseView.extend({
         });
         this.setView(".pages", child, true);
         child.render();
-
-//
-//        if (_.has(options, "header")) {
-//            this.setView("#header", options.header, true)
-//        }
-
     },
     decorate: function(tagsJSON) {
         var l = tagsJSON.length, i = 0, j = 0, k = 0, id = "";

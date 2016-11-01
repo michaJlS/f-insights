@@ -15,6 +15,10 @@ Handlebars.registerHelper("debug", function(optionalValue) {
   }
 });
 
+Handlebars.registerHelper("attr", function(val) {
+    return val.replace('"', '&quot;')
+});
+
 
 var FlickrAssistant = {};
 FlickrAssistant.Models = {};

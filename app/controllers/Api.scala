@@ -69,9 +69,25 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
   def statsFavsOwners(nsid:String) = myActionTpl(nsid).async( implicit request => {
 
     val threshold = request.getQueryString("threshold").map(_.toInt).getOrElse(3)
+    val nonContactsOnly = request.getQueryString("non_contacts") == Some("true")
+    val favsFuture = dashboardService.getFavouritesFromLastDashboard(nsid)
 
-    dashboardService.
-      getFavouritesFromLastDashboard(nsid).
+    val filteredFavsFuture = if (nonContactsOnly) {
+      val contactsFuture = dashboardService.getContactsFromLastDashboard(nsid).map {
+        case Some(contacts) => Some(contacts.map(_.nsid).toSet)
+        case _ => None
+      }
+      favsFuture.flatMap(favs => contactsFuture.map( contacts =>
+        (favs, contacts) match {
+          case (Some(fs), Some(cs)) => Some(fs.filterNot(fr => cs.contains(fr.photo.owner)))
+          case _ => None
+        }
+      ))
+    } else {
+      favsFuture
+    }
+
+    filteredFavsFuture.
       map {
         case Some(favs) => Some(stats.favsOwnersStats(favs, threshold))
         case _ => None

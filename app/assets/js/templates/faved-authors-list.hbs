@@ -1,7 +1,7 @@
 <div>
-    {{#each tags}}
+    {{#each owners}}
         <h5>
-            <strong>{{tag}}</strong>
+            <a href="https://www.flickr.com/photos/{{owner}}/" target="_blank"><img src="http://flickr.com/buddyicons/{{owner}}.jpg"> <strong>{{owner_name}}</strong></a></td>
             <span class="count">({{count}})</span>
         </h5>
         <p>
