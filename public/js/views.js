@@ -1,22 +1,36 @@
 FlickrAssistant.Views.TopFavedAuthors = FlickrAssistant.BaseView.extend({
     owners: null,
+    contacts: null,
+    nonContacts: false,
     template: "top-faved-authors",
     events: {
         "click .non-contacts": "switchToNonContacts"
     },
     initialize: function () {
+        this.contacts = new FlickrAssistant.Collections.Contact(null, {"nsid": FlickrAssistant.Context.nsid});
         this.owners = new FlickrAssistant.Collections.StatsFavOwner(null, {"nsid": FlickrAssistant.Context.nsid});
+        // TODO redundant with header ... share somehow
+        this.contacts.fetch();
         this.owners.fetch({
             success: this.render.bind(this)
         });
     },
     switchToNonContacts: function(e) {
         e.stopImmediatePropagation();
+        this.nonContacts = true;
+        this.render();
         return false;
     },
     serialize: function () {
+         var json = this.owners.toJSON();
+         var contactsIds = this.contacts.pluck("nsid");
+         if (this.nonContacts) {
+            json = json.filter(function(obj) {
+                return -1 === contactsIds.indexOf(obj.owner)
+            });
+         }
          return {
-             owners: this.owners.toJSON().slice(0, 10)
+             owners: json.slice(0, 10)
          };
     }
 });
