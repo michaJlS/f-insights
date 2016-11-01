@@ -42,37 +42,78 @@ FlickrAssistant.Views.TopFavedAuthors = FlickrAssistant.BaseView.extend({
          };
     }
 });
-
+FlickrAssistant.Views.FavedTagsList = FlickrAssistant.BaseView.extend({
+    template: "faved-tags-list",
+    tags: [],
+    initialize: function (options) {
+        this.tags = options.tags
+    },
+    serialize: function () {
+        return {
+            tags: this.tags
+        }
+    }
+});
 FlickrAssistant.Views.TopFavedTags = FlickrAssistant.BaseView.extend({
-    tags: null,
     template: "top-faved-tags",
+    tags: [],
+    page: 0,
+    displayedPics: [],
+    events: {
+        "click .moar": "onAddPage"
+    },
     initialize: function () {
         this.tags = new FlickrAssistant.Collections.StatsFavTag(null, {"nsid": FlickrAssistant.Context.nsid});
         this.tags.fetch({
-            success: this.render.bind(this),
+            success: this.addPage.bind(this),
             data: {threshold: 20}
         });
     },
-    serialize: function () {
-        var tagsJSON = this.tags.toJSON().slice(0, 10),
-            l = tagsJSON.length, i = 0, displayedPics = [], j = 0, k = 0, id = "";
+    onAddPage: function(e) {
+        e.stopImmediatePropagation();
+        this.addPage();
+        return false;
+    },
+    addPage: function() {
+        var from = function(x){ return 10 * (x-1); },
+            to = function(x) { return 10 * x; },
+            tagsJSON = [], child = null;
+
+        if (to(this.page) >= this.tags.length) {
+            return false;
+        }
+
+        ++this.page;
+        tagsJSON = this.tags.toJSON().slice(from(this.page), to(this.page));
+        child = new FlickrAssistant.Views.FavedTagsList({
+            tags: this.decorate(tagsJSON)
+        });
+        this.setView(".pages", child, true);
+        child.render();
+
+//
+//        if (_.has(options, "header")) {
+//            this.setView("#header", options.header, true)
+//        }
+
+    },
+    decorate: function(tagsJSON) {
+        var l = tagsJSON.length, i = 0, j = 0, k = 0, id = "";
 
         for (i = 0; i<l; i++) {
             j = 0; k = tagsJSON[i]["photos"].length;
             tagsJSON[i].topphotos = [];
             while (tagsJSON[i].topphotos.length < 3 && j < k) {
                 id = tagsJSON[i]["photos"][j]["photo"]["id"]
-                if (-1 === displayedPics.indexOf(id)) {
+                if (-1 === this.displayedPics.indexOf(id)) {
                     tagsJSON[i].topphotos.push(tagsJSON[i]["photos"][j]);
-                    displayedPics.push(id);
+                    this.displayedPics.push(id);
                 }
                 ++j;
             }
         }
 
-        return {
-            tags: tagsJSON
-        };
+        return tagsJSON;
     }
 });
 

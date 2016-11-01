@@ -6,6 +6,20 @@
 {{/if}}
 </h2>
 
+<div>
+    {{#each owners}}
+        <h5>
+           <a href="https://www.flickr.com/photos/{{owner}}/" target="_blank"><img src="http://flickr.com/buddyicons/{{owner}}.jpg"> <strong>{{owner_name}}</strong></a></td>
+           <span class="count">({{count}})</span>
+        </h5>
+        <p>
+        {{#each topphotos}}
+            <a href="https://www.flickr.com/photos/{{photo.owner}}/{{photo.id}}" target="_blank"><img src="{{photo.urls.largeSquareThumb}}"></a>
+        {{/each}}
+       </p>
+    {{/each}}
+</div>
+
 <table class="table table-striped">
     <thead>
     <tr>
@@ -14,19 +28,6 @@
     </tr>
     </thead>
     <tbody>
-        {{#each owners}}
-        <tr>
-            <td><a href="https://www.flickr.com/photos/{{owner}}/" target="_blank"><img src="http://flickr.com/buddyicons/{{owner}}.jpg"> <strong>{{owner_name}}</strong></a></td>
-            <td>{{count}}</td>
-        </tr>
-        <tr>
-            <td colspan="2">
-            {{#each topphotos}}
-                <a href="https://www.flickr.com/photos/{{photo.owner}}/{{photo.id}}" target="_blank"><img src="{{photo.urls.largeSquareThumb}}"></a>
-            {{/each}}
-            </td>
-        </tr>
-        {{/each}}
     </tbody>
 </table>
 <p><a href="#" class="moar">Show more ...</a></p>

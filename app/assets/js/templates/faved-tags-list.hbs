@@ -1,0 +1,13 @@
+<div>
+    {{#each tags}}
+        <h5>
+            <strong>{{tag}}</strong>
+            <span class="count">({{count}})</span>
+        </h5>
+        <p>
+            {{#each topphotos}}
+                <a href="https://www.flickr.com/photos/{{photo.owner}}/{{photo.id}}" target="_blank"><img src="{{photo.urls.largeSquareThumb}}"></a>
+            {{/each}}
+        </p>
+    {{/each}}
+</div>
