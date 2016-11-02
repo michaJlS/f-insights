@@ -1,7 +1,17 @@
 this["FlickrAssistantTemplates"] = this["FlickrAssistantTemplates"] || {};
 
 this["FlickrAssistantTemplates"]["daterange"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<form action=\"#\" method=\"get\" class=\"daterange\">\n    From: <input type=\"date\" name=\"from\"> to: <input type=\"date\" name=\"to\">\n    <input type=\"submit\" value=\"Apply\">\n</form>";
+    var helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
+
+  return "<form action=\"#\" method=\"get\" class=\"daterange form-inline\">\n    <div class=\"form-group\">\n        <label for=\""
+    + alias4(((helper = (helper = helpers.fid || (depth0 != null ? depth0.fid : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fid","hash":{},"data":data}) : helper)))
+    + "-from-field\">From:</label>\n        <input type=\"date\" name=\"from\" placeholder=\"YYYY-MM-DD\" class=\"form-control\" id=\""
+    + alias4(((helper = (helper = helpers.fid || (depth0 != null ? depth0.fid : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fid","hash":{},"data":data}) : helper)))
+    + "-from-field\">\n    </div>\n    <div class=\"form-group\">\n        <label for=\""
+    + alias4(((helper = (helper = helpers.fid || (depth0 != null ? depth0.fid : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fid","hash":{},"data":data}) : helper)))
+    + "-to-field\">to:</label>\n        <input type=\"date\" name=\"to\" placeholder=\"YYYY-MM-DD\" class=\"form-control\" id=\""
+    + alias4(((helper = (helper = helpers.fid || (depth0 != null ? depth0.fid : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"fid","hash":{},"data":data}) : helper)))
+    + "-to-field\">\n    </div>\n    <button class=\"btn btn-default\" type=\"submit\">Apply</button>\n</form>";
 },"useData":true});
 
 this["FlickrAssistantTemplates"]["faved-authors-list"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {

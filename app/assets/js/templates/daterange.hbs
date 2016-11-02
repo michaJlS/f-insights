@@ -1,4 +1,11 @@
-<form action="#" method="get" class="daterange">
-    From: <input type="date" name="from"> to: <input type="date" name="to">
-    <input type="submit" value="Apply">
+<form action="#" method="get" class="daterange form-inline">
+    <div class="form-group">
+        <label for="{{fid}}-from-field">From:</label>
+        <input type="date" name="from" placeholder="YYYY-MM-DD" class="form-control" id="{{fid}}-from-field">
+    </div>
+    <div class="form-group">
+        <label for="{{fid}}-to-field">to:</label>
+        <input type="date" name="to" placeholder="YYYY-MM-DD" class="form-control" id="{{fid}}-to-field">
+    </div>
+    <button class="btn btn-default" type="submit">Apply</button>
 </form>

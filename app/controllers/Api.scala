@@ -13,6 +13,7 @@ import play.api.libs.ws.WSClient
 import play.api.mvc._
 
 import scala.concurrent.Future
+import kittens.Conversions._
 
 class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiRepository) extends Controller
 {
@@ -52,12 +53,12 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
 
   def statsFavsTags(nsid:String) = myActionTpl(nsid).async(implicit request => {
     val threshold = request.getQueryString("threshold").map(_.toInt).getOrElse(3)
-    val fromTimestamp = request.getQueryString("form_timestamp").filter(_.length>0)
+    val fromTimestamp = request.getQueryString("from_timestamp").filter(_.length>0)
     val toTimestamp = request.getQueryString("to_timestamp").filter(_.length>0)
 
     dashboardService.
       getFavouritesFromLastDashboard(nsid).
-      map {_.map(dashboardService.filterDateRange(_, fromTimestamp, toTimestamp))} .
+      mapOpt {dashboardService.filterDateRange(_, fromTimestamp, toTimestamp)} .
       map {
         case Some(favs) => {
           val tagsStats = Some(stats.favsTagsStats(favs, threshold))
@@ -70,7 +71,7 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
   def statsFavsOwners(nsid:String) = myActionTpl(nsid).async( implicit request => {
     val threshold = request.getQueryString("threshold").map(_.toInt).getOrElse(3)
     val nonContactsOnly = request.getQueryString("non_contacts") == Some("true")
-    val fromTimestamp = request.getQueryString("form_timestamp").filter(_.length>0)
+    val fromTimestamp = request.getQueryString("from_timestamp").filter(_.length>0)
     val toTimestamp = request.getQueryString("to_timestamp").filter(_.length>0)
 
 
@@ -80,7 +81,7 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
       dashboardService.getFavouritesFromLastDashboard(nsid)
 
     favsFuture.
-      map {_.map(dashboardService.filterDateRange(_, fromTimestamp, toTimestamp))} .
+      mapOpt {dashboardService.filterDateRange(_, fromTimestamp, toTimestamp)} .
       map {
         case Some(favs) => {
           val tagsStats = stats.favsOwnersStats(favs, threshold)
@@ -96,10 +97,12 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
 
 
   def preload(nsid:String) = myActionTpl(nsid).async( implicit request => {
+    val futureFavs = repository.getAllUserPublicFavoritesParallely(nsid, request.token)
+    val futureContacts = repository.getAllUserPublicContacts(nsid, request.token)
     val data = for {
-      fFavs <- repository.getAllUserPublicFavoritesParallely(nsid, request.token)
-      fContacts <- repository.getAllUserPublicContacts(nsid, request.token)
-    } yield (fFavs, fContacts)
+      favs <- futureFavs
+      contacts <- futureContacts
+    } yield (favs, contacts)
 
     data.
       flatMap({
