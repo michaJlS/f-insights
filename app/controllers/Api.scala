@@ -14,7 +14,6 @@ import play.api.mvc._
 
 import scala.concurrent.Future
 
-
 class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiRepository) extends Controller
 {
 
@@ -25,78 +24,70 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
   import infrastructure.json.JsonWrites._
 
   def userGetInfo(nsid:String) = userActionTpl(nsid).async(implicit request => {
-      repository.
-        getUserInfo(nsid, request.token).
-        map {
-          case Some(ui) =>  Ok(Json.toJson(ui))
-          case _ => InternalServerError(Json.toJson("Error while loading user info."))
-        }
-    })
+    repository.
+      getUserInfo(nsid, request.token).
+      map {
+        case Some(ui) =>  Ok(Json.toJson(ui))
+        case _ => InternalServerError(Json.toJson("Error while loading user info."))
+      }
+  })
 
   def getLastDashboard(nsid: String) = userActionTpl(nsid).async(implicit request => {
-        dashboardService.
-          getLastDashboard(nsid).
-          map {
-            case Some(dashboard) => Ok(Json.toJson[Dashboard](dashboard))
-            case None => NotFound(Json.toJson("Could not find dashboard"))
-          }
-      })
+    dashboardService.
+      getLastDashboard(nsid).
+      map {
+        case Some(dashboard) => Ok(Json.toJson[Dashboard](dashboard))
+        case None => NotFound(Json.toJson("Could not find dashboard"))
+      }
+  })
 
   def userGetContacts(nsid: String) = myActionTpl(nsid).async(implicit request => {
-        dashboardService.
-          getContactsFromLastDashboard(nsid).
-          map {
-            case Some(contacts) => Ok(Json.toJson(contacts))
-            case _ => InternalServerError(Json.toJson("Error during fetching contacts."))
-          }
-      })
+    dashboardService.
+      getContactsFromLastDashboard(nsid).
+      map {
+        case Some(contacts) => Ok(Json.toJson(contacts))
+        case _ => InternalServerError(Json.toJson("Error during fetching contacts."))
+      }
+  })
 
   def statsFavsTags(nsid:String) = myActionTpl(nsid).async(implicit request => {
-        val threshold = request.getQueryString("threshold").map(_.toInt).getOrElse(3)
-
-        dashboardService.
-          getFavouritesFromLastDashboard(nsid).
-          map {
-            case Some(favs) => Some(stats.favsTagsStats(favs, threshold))
-            case None => None
-          } .
-          map {
-            case Some(tagsStats) => Ok(Json.toJson(tagsStats))
-            case None => InternalServerError(Json.toJson("Error during preparing stats of favs tags"))
-          }
-      })
-
-  def statsFavsOwners(nsid:String) = myActionTpl(nsid).async( implicit request => {
-
     val threshold = request.getQueryString("threshold").map(_.toInt).getOrElse(3)
-    val nonContactsOnly = request.getQueryString("non_contacts") == Some("true")
-    val favsFuture = dashboardService.getFavouritesFromLastDashboard(nsid)
+    val fromTimestamp = request.getQueryString("form_timestamp").filter(_.length>0)
+    val toTimestamp = request.getQueryString("to_timestamp").filter(_.length>0)
 
-    val filteredFavsFuture = if (nonContactsOnly) {
-      val contactsFuture = dashboardService.getContactsFromLastDashboard(nsid).map {
-        case Some(contacts) => Some(contacts.map(_.nsid).toSet)
-        case _ => None
-      }
-      favsFuture.flatMap(favs => contactsFuture.map( contacts =>
-        (favs, contacts) match {
-          case (Some(fs), Some(cs)) => Some(fs.filterNot(fr => cs.contains(fr.photo.owner)))
-          case _ => None
+    dashboardService.
+      getFavouritesFromLastDashboard(nsid).
+      map {_.map(dashboardService.filterDateRange(_, fromTimestamp, toTimestamp))} .
+      map {
+        case Some(favs) => {
+          val tagsStats = Some(stats.favsTagsStats(favs, threshold))
+          Ok(Json.toJson(tagsStats))
         }
-      ))
-    } else {
-      favsFuture
-    }
-
-    filteredFavsFuture.
-      map {
-        case Some(favs) => Some(stats.favsOwnersStats(favs, threshold))
-        case _ => None
-      } .
-      map {
-        case Some(tagsStats) => Ok(Json.toJson(tagsStats))
         case _ => InternalServerError(Json.toJson("Error during preparing stats of favs tags"))
       }
+  })
 
+  def statsFavsOwners(nsid:String) = myActionTpl(nsid).async( implicit request => {
+    val threshold = request.getQueryString("threshold").map(_.toInt).getOrElse(3)
+    val nonContactsOnly = request.getQueryString("non_contacts") == Some("true")
+    val fromTimestamp = request.getQueryString("form_timestamp").filter(_.length>0)
+    val toTimestamp = request.getQueryString("to_timestamp").filter(_.length>0)
+
+
+    val favsFuture = if (nonContactsOnly)
+      dashboardService.getFavourtiesForNonCotactsFromLastDashboard(nsid)
+    else
+      dashboardService.getFavouritesFromLastDashboard(nsid)
+
+    favsFuture.
+      map {_.map(dashboardService.filterDateRange(_, fromTimestamp, toTimestamp))} .
+      map {
+        case Some(favs) => {
+          val tagsStats = stats.favsOwnersStats(favs, threshold)
+          Ok(Json.toJson(tagsStats))
+        }
+        case _ => InternalServerError(Json.toJson("Error during preparing stats of favs tags"))
+      }
   } )
 
   def statsUserTags(nsid:String) = Action.async( implicit request => {
@@ -105,21 +96,20 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
 
 
   def preload(nsid:String) = myActionTpl(nsid).async( implicit request => {
+    val data = for {
+      fFavs <- repository.getAllUserPublicFavoritesParallely(nsid, request.token)
+      fContacts <- repository.getAllUserPublicContacts(nsid, request.token)
+    } yield (fFavs, fContacts)
 
-      val data = for {
-        fFavs <- repository.getAllUserPublicFavoritesParallely(nsid, request.token)
-        fContacts <- repository.getAllUserPublicContacts(nsid, request.token)
-      } yield (fFavs, fContacts)
-
-      data.
-        flatMap({
-          case (Some(favs), Some(contacts)) => dashboardService.buildNewDashboard(nsid, favs, contacts)
-          case _ => Future.successful {None}
-        }).
-        map({
-          case Some(dashboardId) => Created(Json.toJson("ok"))
-          case _ => InternalServerError(Json.toJson("Something went wrong."))
-        })
+    data.
+      flatMap({
+        case (Some(favs), Some(contacts)) => dashboardService.buildNewDashboard(nsid, favs, contacts)
+        case _ => Future.successful {None}
+      }).
+      map({
+        case Some(dashboardId) => Created(Json.toJson("ok"))
+        case _ => InternalServerError(Json.toJson("Something went wrong."))
+      })
 
   })
 

@@ -17,7 +17,8 @@ pipelineStages := Seq(digest)
 val PhantomVersion = "1.22.0"
 
 libraryDependencies ++= Seq(
-  "com.websudos" %% "phantom-dsl" % PhantomVersion
+  "com.websudos" %% "phantom-dsl" % PhantomVersion,
+  "org.scalaz" %% "scalaz-core" % "7.2.6"
 )
 
 resolvers ++= Seq(

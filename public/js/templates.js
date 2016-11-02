@@ -1,5 +1,9 @@
 this["FlickrAssistantTemplates"] = this["FlickrAssistantTemplates"] || {};
 
+this["FlickrAssistantTemplates"]["daterange"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "<form action=\"#\" method=\"get\" class=\"daterange\">\n    From: <input type=\"date\" name=\"from\"> to: <input type=\"date\" name=\"to\">\n    <input type=\"submit\" value=\"Apply\">\n</form>";
+},"useData":true});
+
 this["FlickrAssistantTemplates"]["faved-authors-list"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
 
@@ -79,7 +83,7 @@ this["FlickrAssistantTemplates"]["header"] = Handlebars.template({"compiler":[7,
 },"useData":true});
 
 this["FlickrAssistantTemplates"]["home"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<div class=\"row\">\n    <div class=\"col-md-6 left-panel faved-tags\"></div>\n    <div class=\"col-md-6 right-panel faved-authors\"></div>\n</div>\n";
+    return "<div class=\"faved-filters\"></div>\n<div class=\"row\">\n    <div class=\"col-md-6 left-panel faved-tags\"></div>\n    <div class=\"col-md-6 right-panel faved-authors\"></div>\n</div>\n";
 },"useData":true});
 
 this["FlickrAssistantTemplates"]["layout"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {

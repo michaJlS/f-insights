@@ -1,3 +1,17 @@
+FlickrAssistant.Views.DateRange = FlickrAssistant.BaseView.extend({
+    template: "daterange",
+    filterChange: function(){},
+    initialize: function(options) {
+        this.filterChange = options.filterChange;
+    },
+    events: {
+        "submit .daterange": "onSubmit"
+    },
+    onSubmit: function() {
+        this.filterChange("from", "to");
+        return false;
+    }
+});
 FlickrAssistant.Views.TopFavedAuthors = FlickrAssistant.BaseView.extend({
     owners: null,
     ownersNoContacts: null,
@@ -147,8 +161,14 @@ FlickrAssistant.Views.TopFavedTags = FlickrAssistant.BaseView.extend({
 FlickrAssistant.Views.Home = FlickrAssistant.BaseView.extend({
     template: "home",
     initialize: function () {
+        this.setView(".faved-filters", new FlickrAssistant.Views.DateRange({
+            filterChange: this.onFilterChange.bind(this)
+        }), true)
         this.setView(".faved-authors", new FlickrAssistant.Views.TopFavedAuthors(), true)
         this.setView(".faved-tags", new FlickrAssistant.Views.TopFavedTags(), true)
+    },
+    onFilterChange: function(from, to) {
+        console.log(from, to)
     }
 });
 
