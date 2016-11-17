@@ -1,19 +1,20 @@
 package controllers
 
-import controllers.actions._
-import domain.service.{DashboardService, Stats}
-import infrastructure.cassandra.FlickrAssistantDb
 import javax.inject.Inject
 
+import controllers.actions._
 import domain.entities.Dashboard
+import domain.service.{DashboardService, Stats}
+import infrastructure.cassandra.FlickrAssistantDb
 import infrastructure.flickr.ApiRepository
-import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 
 import scala.concurrent.Future
-import kittens.Conversions._
+import scalaz.Scalaz._
+import scalaz._
 
 class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiRepository) extends Controller
 {
@@ -56,16 +57,10 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
     val fromTimestamp = request.getQueryString("from_timestamp").filter(_.length>0)
     val toTimestamp = request.getQueryString("to_timestamp").filter(_.length>0)
 
-    dashboardService.
-      getFavouritesFromLastDashboard(nsid).
-      mapOpt {dashboardService.filterDateRange(_, fromTimestamp, toTimestamp)} .
-      map {
-        case Some(favs) => {
-          val tagsStats = Some(stats.favsTagsStats(favs, threshold))
-          Ok(Json.toJson(tagsStats))
-        }
-        case _ => InternalServerError(Json.toJson("Error during preparing stats of favs tags"))
-      }
+    OptionT(dashboardService.getFavouritesFromLastDashboard(nsid))
+      .map{dashboardService.filterDateRange(_, fromTimestamp, toTimestamp)}
+      .map(favs => Ok(Json.toJson(Some(stats.favsTagsStats(favs, threshold)))))
+      .getOrElse(InternalServerError(Json.toJson("Error during preparing stats of favs tags")))
   })
 
   def statsFavsOwners(nsid:String) = myActionTpl(nsid).async( implicit request => {
@@ -74,21 +69,15 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
     val fromTimestamp = request.getQueryString("from_timestamp").filter(_.length>0)
     val toTimestamp = request.getQueryString("to_timestamp").filter(_.length>0)
 
-
-    val favsFuture = if (nonContactsOnly)
-      dashboardService.getFavourtiesForNonCotactsFromLastDashboard(nsid)
-    else
-      dashboardService.getFavouritesFromLastDashboard(nsid)
-
-    favsFuture.
-      mapOpt {dashboardService.filterDateRange(_, fromTimestamp, toTimestamp)} .
-      map {
-        case Some(favs) => {
-          val tagsStats = stats.favsOwnersStats(favs, threshold)
-          Ok(Json.toJson(tagsStats))
-        }
-        case _ => InternalServerError(Json.toJson("Error during preparing stats of favs tags"))
-      }
+    OptionT {
+      if (nonContactsOnly)
+        dashboardService.getFavourtiesForNonCotactsFromLastDashboard(nsid)
+      else
+        dashboardService.getFavouritesFromLastDashboard(nsid)
+    }
+      .map(dashboardService.filterDateRange(_, fromTimestamp, toTimestamp))
+      .map(favs => Ok(Json.toJson(stats.favsOwnersStats(favs, threshold))))
+      .getOrElse(InternalServerError(Json.toJson("Error during preparing stats of favs tags")))
   } )
 
   def statsUserTags(nsid:String) = Action.async( implicit request => {

@@ -18,7 +18,8 @@ val PhantomVersion = "1.22.0"
 
 libraryDependencies ++= Seq(
   "com.websudos" %% "phantom-dsl" % PhantomVersion,
-  "org.scalaz" %% "scalaz-core" % "7.2.6"
+  "org.scalaz" %% "scalaz-core" % "7.2.7",
+  "org.specs2" %% "specs2-core" % "3.8.6" % "test"
 )
 
 resolvers ++= Seq(
