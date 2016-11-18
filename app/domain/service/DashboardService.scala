@@ -6,25 +6,15 @@ import domain.entities.{AppUserDetail, Contact, Dashboard, Favourite}
 import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
+import scalaz.Scalaz._
+import scalaz._
 
+class DashboardService(appRepository: AppRepository) {
 
-object DashboardService {
-
-  val dashboard_property_name = "last_dashboard"
-
-}
-
-class DashboardService(appRepository: AppRepository)
-{
-
-  def getLastDashboard(nsid: String)(implicit executor:ExecutionContext) = {
-    appRepository.
-      getUserDetail(nsid, DashboardService.dashboard_property_name).
-      flatMap {
-        case Some(detail) => appRepository.getDashboard(nsid, detail.detail_value)
-        case None => Future.successful {None}
-      }
-  }
+  def getLastDashboard(nsid: String)(implicit executor: ExecutionContext): Future[Option[Dashboard]] =
+    OptionT(appRepository.getUserDetail(nsid, DashboardService.dashboard_property_name))
+      .flatMap(detail => OptionT(appRepository.getDashboard(nsid, detail.detail_value)))
+      .run
 
   def buildNewDashboard(nsid: String, favs: Seq[Favourite], contacts: Seq[Contact])(implicit executor:ExecutionContext) = {
     val dashboard = new Dashboard(nsid, UUID.randomUUID(), DateTime.now())
@@ -32,41 +22,39 @@ class DashboardService(appRepository: AppRepository)
 
     appRepository.
       insertDashboard(dashboard).
-      flatMap(_ => appRepository.insertFavourties(dashboard.id, favs)).
-      flatMap(_ => appRepository.insertUserDetail(dashboardInfo)).
-      flatMap(_ => appRepository.insertContacts(dashboard.id, contacts)).
+      flatMap(_ => {
+        val favsF = appRepository.insertFavourties(dashboard.id, favs)
+        val contactsF = appRepository.insertContacts(dashboard.id, contacts)
+        val userF = appRepository.insertUserDetail(dashboardInfo)
+        for {
+          _ <- favsF
+          _ <- contactsF
+          _ <- userF
+        } yield true
+      }).
       map(_ => Some(dashboard.id))
   }
 
-  def getFavouritesFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Favourite]]] = {
-    getLastDashboard(nsid).
-      flatMap({
-        case Some(dashboard) => appRepository.getFavouritesByDashboardId(dashboard.id).map((favs:List[Favourite]) => Some(favs))
-        case _ => Future.successful {None}
-      })
-  }
+  def getFavouritesFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Favourite]]] =
+    OptionT(getLastDashboard(nsid))
+      .flatMapF(dashboard => appRepository.getFavouritesByDashboardId(dashboard.id))
+      .run
 
-  def getContactsFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Contact]]] = {
-    getLastDashboard(nsid).
-      flatMap({
-        case Some(dashboard) => appRepository.getContactsByDashboardId(dashboard.id).map((contacts:List[Contact]) => Some(contacts))
-        case _ => Future.successful {None}
-      })
-  }
+  def getContactsFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Contact]]] =
+    OptionT(getLastDashboard(nsid))
+      .flatMapF(dashboard => appRepository.getContactsByDashboardId(dashboard.id))
+      .run
 
   def getFavourtiesForNonCotactsFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Favourite]]] = {
-    val favsFuture = getFavouritesFromLastDashboard(nsid)
-    val contactsFuture = getContactsFromLastDashboard(nsid).map {
-      case Some(contacts) => Some(contacts.map(_.nsid).toSet)
-      case _ => None
-    }
+    val favsFuture = OptionT(getFavouritesFromLastDashboard(nsid))
+    val contactsFuture = OptionT(getContactsFromLastDashboard(nsid))
 
-    favsFuture.flatMap(favs => contactsFuture.map( contacts =>
-      (favs, contacts) match {
-        case (Some(fs), Some(cs)) => Some(fs.filterNot(fr => cs.contains(fr.photo.owner)))
-        case _ => None
-      }
-    ))
+    (for {
+      favs <- favsFuture
+      contacts <- contactsFuture
+      contactsIds = contacts.map(_.nsid).toSet
+    } yield favs.filterNot(fr => contactsIds.contains(fr.photo.owner)))
+      .run
   }
 
   def filterDateRange(favs: List[Favourite], from: Option[String], to: Option[String]) = (from, to) match {
@@ -76,4 +64,8 @@ class DashboardService(appRepository: AppRepository)
       case (None, None)       => favs
     }
 
+}
+
+object DashboardService {
+  val dashboard_property_name = "last_dashboard"
 }
