@@ -6,8 +6,8 @@ import domain.entities.{AppUserDetail, Contact, Dashboard, Favourite}
 import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
-import scalaz.Scalaz._
 import scalaz._
+import Scalaz._
 
 class DashboardService(appRepository: AppRepository) {
 
