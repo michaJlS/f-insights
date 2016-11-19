@@ -52,3 +52,20 @@ CREATE TABLE favourites (
 
 -- phantom does not support it yet:(
 -- urls frozen <photo_urls>,
+
+CREATE TABLE photos (
+    dashboard_id uuid,
+    photo_id varchar,
+    title varchar,
+    owner varchar,
+    owner_name varchar,
+    date_upload varchar,
+    date_taken varchar,
+    count_views int,
+    count_faves int,
+    count_comments int,
+    tags varchar,
+    machine_tags varchar,
+    urls map<varchar, varchar>,
+    PRIMARY KEY ((dashboard_id), photo_id)
+);

@@ -3,7 +3,7 @@ package domain.service
 
 import java.util.UUID
 
-import domain.entities.{AppUserDetail, Contact, Dashboard, Favourite}
+import domain.entities._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,4 +36,9 @@ trait AppRepository
 
   def getContactsByDashboardId(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[Contact]]
 
+  def insertUserPhoto(dashboardId:UUID, photo: PhotoExcerpt)(implicit executor:ExecutionContext): Future[Boolean]
+
+  def insertUserPhotos(dashboardId:UUID, photos: Seq[PhotoExcerpt])(implicit executor:ExecutionContext) = Future.sequence(photos.map(insertUserPhoto(dashboardId, _))).map(_ => true)
+
+  def getPhotosByDashboardId(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[PhotoExcerpt]]
 }

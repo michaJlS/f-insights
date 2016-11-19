@@ -88,14 +88,16 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
   def preload(nsid:String) = myActionTpl(nsid).async( implicit request => {
     val futureFavs = repository.getAllUserPublicFavorites(nsid, request.token)
     val futureContacts = repository.getAllUserPublicContacts(nsid, request.token)
+    val futurePhotos = repository.getAllUserPhotos(nsid, request.token)
     val data = for {
       favs <- futureFavs
       contacts <- futureContacts
-    } yield (favs, contacts)
+      photos <- futurePhotos
+    } yield (favs, contacts, photos)
 
     data.
       flatMap({
-        case (Some(favs), Some(contacts)) => dashboardService.buildNewDashboard(nsid, favs, contacts)
+        case (Some(favs), Some(contacts), Some(photos)) => dashboardService.buildNewDashboard(nsid, favs, contacts, photos)
         case _ => Future.successful {None}
       }).
       map({

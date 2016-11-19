@@ -2,7 +2,7 @@ package domain.service
 
 import java.util.UUID
 
-import domain.entities.{AppUserDetail, Contact, Dashboard, Favourite}
+import domain.entities._
 import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,7 +16,13 @@ class DashboardService(appRepository: AppRepository) {
       .flatMap(detail => OptionT(appRepository.getDashboard(nsid, detail.detail_value)))
       .run
 
-  def buildNewDashboard(nsid: String, favs: Seq[Favourite], contacts: Seq[Contact])(implicit executor:ExecutionContext) = {
+  def buildNewDashboard(
+                         nsid: String,
+                         favs: Seq[Favourite],
+                         contacts: Seq[Contact],
+                         photos: Seq[PhotoExcerpt]
+                       )
+                       (implicit executor:ExecutionContext) = {
     val dashboard = new Dashboard(nsid, UUID.randomUUID(), DateTime.now())
     val dashboardInfo = AppUserDetail(nsid, DashboardService.dashboard_property_name, dashboard.id.toString)
 
@@ -25,10 +31,12 @@ class DashboardService(appRepository: AppRepository) {
       flatMap(_ => {
         val favsF = appRepository.insertFavourties(dashboard.id, favs)
         val contactsF = appRepository.insertContacts(dashboard.id, contacts)
+        val photosF = appRepository.insertUserPhotos(dashboard.id, photos)
         val userF = appRepository.insertUserDetail(dashboardInfo)
         for {
           _ <- favsF
           _ <- contactsF
+          _ <- photosF
           _ <- userF
         } yield true
       }).
@@ -38,6 +46,12 @@ class DashboardService(appRepository: AppRepository) {
   def getFavouritesFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Favourite]]] =
     OptionT(getLastDashboard(nsid))
       .flatMapF(dashboard => appRepository.getFavouritesByDashboardId(dashboard.id))
+      .run
+
+
+  def getUserPhotosFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[PhotoExcerpt]]] =
+    OptionT(getLastDashboard(nsid))
+      .flatMapF(dashboard => appRepository.getPhotosByDashboardId(dashboard.id))
       .run
 
   def getContactsFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Contact]]] =
