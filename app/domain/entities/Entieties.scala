@@ -59,3 +59,10 @@ case class Dashboard(nsid: String, id:UUID, created_at: DateTime)
 case class FavTagStats(tag: String, count: Int, photos:Seq[Favourite])
 
 case class FavOwnerStats(owner: String, owner_name: String, count: Int, photos:Seq[Favourite])
+
+object PhotoExcerpt
+{
+
+  val medtiaTypePhoto = "photo"
+
+}

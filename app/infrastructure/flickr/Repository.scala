@@ -16,8 +16,11 @@ trait Repository
                              favedAfter: Option[String] = None)
                             (implicit executor:ExecutionContext): Future[Option[(CollectionInfo, Seq[Favourite])]]
 
-  def getUserPublicContacts(nsid: String, token:UserToken, page: Int = 1, perpage: Int = 1000)(implicit executor:ExecutionContext)
-        : Future[Option[(CollectionInfo, Seq[Contact])]]
+  def getUserPublicContacts(nsid: String, token:UserToken, page: Int = 1, perpage: Int = 1000)
+                           (implicit executor: ExecutionContext): Future[Option[(CollectionInfo, Seq[Contact])]]
+
+  def getUserPhotos(nsid: String, token: UserToken, page: Int = 1, perpage: Int = 500)
+                   (implicit ec: ExecutionContext): Future[Option[(CollectionInfo, Seq[PhotoExcerpt])]]
 
   def getAllUserPublicFavoritesSequentially(nsid: String, token: UserToken, favedBefore: Option[String] = None, favedAfter: Option[String] = None)
                                            (implicit executor:ExecutionContext): Future[Option[Seq[Favourite]]] = {
@@ -33,26 +36,22 @@ trait Repository
     load(1).run
   }
 
-  def getAllUserPublicFavoritesParallely(nsid: String, token: UserToken, favedBefore: Option[String] = None, favedAfter: Option[String] = None)
-                                        (implicit ec: ExecutionContext): Future[Option[Seq[Favourite]]] =
-    OptionT(getUserPublicFavorites(nsid, token, 1, 500, favedBefore, favedAfter))
-      .flatMapF { case (info, photos) =>
-        val ps = Range(2, info.pages + 1)
-          .map(i => getUserPublicFavorites(nsid, token, i, 500, favedBefore, favedAfter).map(_.map(_._2)))
-          .toSeq :+ Future.successful {Some(photos)}
+  def getAllUserPublicFavorites(nsid: String, token: UserToken)(implicit ec: ExecutionContext): Future[Option[Seq[Favourite]]] =
+    parallelLoader((page: Int) => getUserPublicFavorites(nsid, token, page, 500))
 
-        Future.sequence(ps)
-      }
-      .filter(s => !s.contains(None))
-      .map(_.map(_.get).flatten)
-      .run
+  def getAllUserPublicContacts(nsid: String, token: UserToken)(implicit executor: ExecutionContext): Future[Option[Seq[Contact]]] =
+    parallelLoader((page: Int) => getUserPublicContacts(nsid, token, page, 1000))
 
-  def getAllUserPublicContacts(nsid:String, token:UserToken)(implicit executor: ExecutionContext): Future[Option[Seq[Contact]]] =
-    OptionT(getUserPublicContacts(nsid, token, 1, 1000))
-      .flatMapF { case (info, contacts) =>
+  def getAllUserPhotos(nsid: String, token: UserToken)(implicit executor: ExecutionContext): Future[Option[Seq[PhotoExcerpt]]] =
+    parallelLoader((page: Int) => getUserPhotos(nsid, token, page, 500))
+
+  protected def parallelLoader[T](f: (Int => Future[Option[(CollectionInfo, Seq[T])]]))
+                               (implicit ec: ExecutionContext): Future[Option[Seq[T]]] =
+    OptionT(f(1))
+      .flatMapF { case (info, coll) =>
         val ps = Range(2, info.pages + 1)
-          .map(i => getUserPublicContacts(nsid, token, i, 1000).map(_.map(_._2)))
-          .toSeq :+ Future.successful{Some(contacts)}
+          .map(i => f(i).map(_.map(_._2)))
+          .toSeq :+ Future.successful{Some(coll)}
 
         Future.sequence(ps)
       }

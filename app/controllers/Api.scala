@@ -86,7 +86,7 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
 
 
   def preload(nsid:String) = myActionTpl(nsid).async( implicit request => {
-    val futureFavs = repository.getAllUserPublicFavoritesParallely(nsid, request.token)
+    val futureFavs = repository.getAllUserPublicFavorites(nsid, request.token)
     val futureContacts = repository.getAllUserPublicContacts(nsid, request.token)
     val data = for {
       favs <- futureFavs

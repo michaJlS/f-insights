@@ -11,31 +11,17 @@ import scala.concurrent.{ExecutionContext, Future}
 trait AppRepository
 {
 
-  /**
-    * @throws Exception
-    * @param dashboard
-    * @return
-    */
+  /**  @throws Exception */
   def insertDashboard(dashboard: Dashboard)(implicit executor:ExecutionContext): Future[Boolean]
 
   def getDashboard(nsid: String, dashboard_id: UUID)(implicit executor:ExecutionContext):  Future[Option[Dashboard]]
 
   def getDashboard(nsid: String, dashboard_id: String)(implicit executor:ExecutionContext): Future[Option[Dashboard]] = getDashboard(nsid, UUID.fromString(dashboard_id))
 
-  /**
-    * @throws Exception
-    * @param dashboard_id
-    * @param fav
-    * @return
-    */
+  /** @throws Exception */
   def insertFavourite(dashboard_id: UUID, fav: Favourite)(implicit executor:ExecutionContext): Future[Boolean]
 
-  /**
-    * @throws Exception
-    * @param dashboardId
-    * @param favs
-    * @return
-    */
+  /** @throws Exception */
   def insertFavourties(dashboardId: UUID, favs: Seq[Favourite])(implicit executor:ExecutionContext) = Future.sequence(favs.map(insertFavourite(dashboardId, _))).map(_ => true)
 
   def getFavouritesByDashboardId(dashboard_id: UUID)(implicit executor:ExecutionContext): Future[List[Favourite]]

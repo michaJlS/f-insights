@@ -21,7 +21,7 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey)
     doRequest("flickr.people.getInfo", Map("user_id" -> nsid))
 
   def getUserPublicFavorites(nsid: String, page: Int = 1, perpage: Int = 500, favedBefore: Option[String] = None, favedAfter: Option[String] = None)
-                            (implicit token: UserToken, ec: ExecutionContext):Future[Option[JsValue]] =
+                            (implicit token: UserToken, ec: ExecutionContext): Future[Option[JsValue]] =
     doRequest(
       "flickr.favorites.getPublicList",
       Map(
@@ -37,6 +37,21 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey)
                            (implicit token: UserToken, ec: ExecutionContext) =
     doRequest("flickr.contacts.getPublicList", Map("user_id" -> nsid, "page" -> page.toString, "per_page" -> perpage.toString))
 
+
+  def getUserPhotos(nsid: String, page: Int = 1, perpage: Int = 500)
+                   (implicit token: UserToken, ec: ExecutionContext): Future[Option[JsValue]] =
+    doRequest(
+      "flickr.people.getPhotos",
+      Map(
+        "user_id" -> nsid,
+        "safe_search" -> "3",
+        "content_type" -> "1",
+        "privacy_filter" -> "1",
+        "extras" -> "date_upload,date_taken,owner_name,tags,machine_tags,views,media,count_faves,count_comments,url_q,url_m,url_z,url_l",
+        "page" -> page.toString,
+        "per_page" -> perpage.toString
+      )
+    )
 
   private def doRequest(apiMethod: String, params: Map[String, String] = Map.empty, paramsOpt: Map[String, Option[String]] = Map.empty)
                        (implicit token: UserToken, executionContext: ExecutionContext):Future[Option[JsValue]] =

@@ -5,49 +5,30 @@ import play.api.libs.json.{JsArray, JsLookupResult, JsValue}
 
 import scala.util.{Failure, Success, Try}
 
-/**
- *
- */
-class ResponseParser
-{
 
-  // TODO move me to better place
-  val medtiaTypePhoto = "photo"
+class ResponseParser {
+
+  // TODO go reads...
 
   // sometimes flickr returns numbers as just number, and sometimes it wraps numbers with "", what is interpreted as string by the play json lib
-  // TODO go reads...
-  private def asOptStringToInt(j: JsLookupResult):Option[Int] = {
-    j.asOpt[String].map(s => Try(s.toInt)).flatMap(_ match {
-      case Success(i) => Some(i)
-      case Failure(_) => None
-    })
-  }
+  private def asOptStringToInt(j: JsLookupResult): Option[Int] = j.asOpt[String].flatMap(s => Try(s.toInt).toOption)
 
-  private def asOptIntToString(j: JsLookupResult):Option[String] = {
-    j.asOpt[Int].map(i => Try(i.toString)).flatMap(_ match {
-      case Success(s) => Some(s)
-      case Failure(_) => None
-    })
-  }
+  private def asOptIntToString(j: JsLookupResult): Option[String] = j.asOpt[Int].flatMap(i => Try(i.toString).toOption)
 
-  private def asOptInt(j: JsLookupResult):Option[Int] = {
-    j.asOpt[Int].orElse(asOptStringToInt(j))
-  }
+  private def asOptInt(j: JsLookupResult): Option[Int] = j.asOpt[Int].orElse(asOptStringToInt(j))
 
-  private def asOptString(j: JsLookupResult):Option[String] = {
+  private def asOptString(j: JsLookupResult): Option[String] =
     j.asOpt[String].orElse(asOptIntToString(j))
-  }
 
-  def getTokenInfo(json:JsValue):Option[TokenInfo] = {
+  def getTokenInfo(json:JsValue):Option[TokenInfo] =
     for {
       user <- (json \ "oauth" \ "user").toOption
       nsid <- (user \ "nsid").asOpt[String]
       username <- (user \ "username").asOpt[String]
       fullname <- (user \ "fullname").asOpt[String]
     } yield TokenInfo(nsid, username, fullname)
-  }
 
-  def getUserInfo(json:JsValue):Option[UserInfo] = {
+  def getUserInfo(json:JsValue):Option[UserInfo] =
     for {
       person <- (json \ "person").toOption
       id <- (person \ "id").asOpt[String]
@@ -60,9 +41,8 @@ class ResponseParser
       firstupload <- (photos \ "firstdate" \ "_content").asOpt[String]
 
     } yield UserInfo(id, nsid, username, fullname, photosurl, uploads, firstupload)
-  }
 
-  def getCollectionInfo(json:JsValue, root:String) = {
+  def getCollectionInfo(json:JsValue, root:String) =
     for {
       ci <- (json \ root).toOption
       page <-  asOptInt(ci \ "page")
@@ -70,14 +50,13 @@ class ResponseParser
       perpage <- asOptInt(ci \ "perpage")
       total <- asOptInt(ci \ "total")
     } yield CollectionInfo(page, pages, perpage, total)
-  }
 
   def getPhotosCollectionInfo(json:JsValue):Option[CollectionInfo] = getCollectionInfo(json, "photos")
 
   def getContactsCollectionInfo(json:JsValue):Option[CollectionInfo] = getCollectionInfo(json, "contacts")
 
-  def getPhotoExcerpt(json:JsValue):Option[PhotoExcerpt] = {
-    // // https://www.flickr.com/services/api/misc.urls.html
+  // // https://www.flickr.com/services/api/misc.urls.html
+  def getPhotoExcerpt(json:JsValue):Option[PhotoExcerpt] =
     for {
       id <- asOptString(json \ "id")
       title  <- (json \ "title").asOpt[String]
@@ -95,19 +74,17 @@ class ResponseParser
       url_m <- (json \ "url_m").asOpt[String].orElse(Option(""))
       url_z <- (json \ "url_m").asOpt[String].orElse(Option(""))
       url_l <- (json \ "url_m").asOpt[String].orElse(Option(""))
-      if media == medtiaTypePhoto
+      if media == PhotoExcerpt.medtiaTypePhoto
     } yield PhotoExcerpt(id, title, owner, owner_name, date_upload, date_taken, count_views, count_faves, count_comments, tags, machine_tags,
               PhotoUrls(largeSquareThumb = url_q, largeThumb = url_m, small = url_z, large = url_l))
-  }
 
-  def getFavourite(json:JsValue, favFor:String = ""):Option[Favourite] = {
+  def getFavourite(json:JsValue, favFor:String = ""):Option[Favourite] =
     for {
       photo <- getPhotoExcerpt(json)
       date_faved <- (json \ "date_faved").asOpt[String]
     } yield Favourite(photo, favFor, date_faved)
-  }
 
-  def getFavourites(json:JsValue, favsFor:String  = ""):Option[Seq[Favourite]] = {
+  def getFavourites(json:JsValue, favsFor:String  = ""):Option[Seq[Favourite]] =
     (json \ "photos" \ "photo").toOption match {
       case Some(JsArray(s)) => Some(for {
         js <- s
@@ -115,47 +92,45 @@ class ResponseParser
       } yield fav)
       case _ => None
     }
-  }
 
-  def getContact(json:JsValue, contactOf:String = "") = {
+  def getContact(json:JsValue, contactOf:String = "") =
     for {
       nsid <- asOptString(json \ "nsid")
       username <- asOptString(json \ "username")
     } yield Contact(nsid, username, contactOf)
-  }
 
-  def getContacts(json:JsValue, contactsOf:String = "") = {
-    (json \ "contacts" \ "contact").toOption match {
-      case Some(JsArray(s)) => Some(for {
+  def getContacts(json: JsValue, contactsOf: String = "") =
+    (json \ "contacts" \ "contact").toOption.collect {
+      case JsArray(s) => for {
         js <- s
         c <- getContact(js, contactsOf)
-      } yield c)
-      case _ => None
+      } yield c
     }
-  }
 
-  def getPhotos(json:JsValue):Option[Seq[PhotoExcerpt]] = {
-    (json \ "photos" \ "photo").toOption match {
-      case Some(JsArray(s)) => Some(for {
+  def getPhotos(json:JsValue):Option[Seq[PhotoExcerpt]] =
+    (json \ "photos" \ "photo").toOption.collect {
+      case JsArray(s) => for {
         js <- s
         photo <- getPhotoExcerpt(js)
-      } yield photo)
-      case _ => None
+      } yield photo
     }
-  }
 
-  def getFavouritesWithCollectionInfo(json:JsValue, favFor:String = "") = {
-    (getPhotosCollectionInfo(json), getFavourites(json, favFor)) match {
-      case (Some(info), Some(photos)) => Some((info, photos))
-      case (_, _) => None
-    }
-  }
+  def getFavouritesWithCollectionInfo(json: JsValue, favFor: String = ""): Option[(CollectionInfo, Seq[Favourite])] =
+    for {
+      info <- getPhotosCollectionInfo(json)
+      favs <- getFavourites(json, favFor)
+    } yield (info, favs)
 
-  def getContactsWithCollectionInfo(json:JsValue, contactsOf:String = "") = {
-    (getContactsCollectionInfo(json), getContacts(json, contactsOf)) match {
-      case (Some(info), Some(contacts)) => Some((info, contacts))
-      case (_, _) => None
-    }
-  }
+  def getContactsWithCollectionInfo(json: JsValue, contactsOf: String = ""): Option[(CollectionInfo, Seq[Contact])] =
+    for {
+      info <- getContactsCollectionInfo(json)
+      contacts <- getContacts(json, contactsOf)
+    } yield (info, contacts)
+
+  def getPhotosWithCollectionInfo(json: JsValue): Option[(CollectionInfo, Seq[PhotoExcerpt])] =
+    for {
+      info <- getPhotosCollectionInfo(json)
+      photos <- getPhotos(json)
+    } yield (info, photos)
 
 }
