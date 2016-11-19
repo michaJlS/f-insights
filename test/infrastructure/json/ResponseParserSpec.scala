@@ -26,7 +26,7 @@ class ResponseParserSpec extends Specification with Resources
   val photoExcerptMissingId = jsonResource("/flickrapi/invalid/PhotoExcerptMissingId.json")
   val photoExcerptMissingTitle = jsonResource("/flickrapi/invalid/PhotoExcerptMissingTitle.json")
   val favsJustOneOk = jsonResource("/flickrapi/invalid/FavsJustOneOk.json")
-
+  val photoFavsOk = jsonResource("/flickrapi/valid/Photofavs.json")
 
   "ResponseParser#getTokenInfo()" should {
     "return None if provided json" in {
@@ -130,6 +130,14 @@ class ResponseParserSpec extends Specification with Resources
         l must beSome
         l.get.length must beEqualTo(1)
       }
+    }
+  }
+
+  "ResponseParser#getFavourites()" should {
+    "return list of valid photo favs" in {
+      val l = parser.getPhotoFavourites(photoFavsOk, "someowner")
+      l must beSome
+      l.get.length must beEqualTo(3)
     }
   }
 

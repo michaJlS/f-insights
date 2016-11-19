@@ -17,6 +17,7 @@ class FlickrAssistantDb(val keyspace:KeySpaceDef) extends Database(keyspace) wit
   object AppUserDetails extends ConcreteAppUserDetails with keyspace.Connector
   object Contacts extends ConcreteContacts with keyspace.Connector
   object Photos extends ConcretePhotos with keyspace.Connector
+  object PhotoFavourites extends ConcretePhotoFavourites with keyspace.Connector
 
   override def insertFavourite(dashboard_id: UUID, fav: Favourite)(implicit executor:ExecutionContext): Future[Boolean] = Favourites.insertFavourite(dashboard_id, fav)
 
@@ -37,5 +38,9 @@ class FlickrAssistantDb(val keyspace:KeySpaceDef) extends Database(keyspace) wit
   override def insertUserPhoto(dashboardId:UUID, photo: PhotoExcerpt)(implicit executor:ExecutionContext): Future[Boolean] = Photos.insertPhoto(dashboardId, photo)
 
   override def getPhotosByDashboardId(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[PhotoExcerpt]] = Photos.getByDashboardId(dashboardId)
+
+  override def insertPhotoFavourite(dashboardId:UUID, photoFav: PhotoFavourite)(implicit executor:ExecutionContext): Future[Boolean] = PhotoFavourites.insertPhotoFavourite(dashboardId, photoFav)
+
+  override def getPhotoFavouritesByDashboardId(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[PhotoFavourite]] = PhotoFavourites.getByDashboardId(dashboardId)
 
 }

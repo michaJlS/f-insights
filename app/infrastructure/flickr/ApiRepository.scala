@@ -33,4 +33,11 @@ class ApiRepository(apiClient:ApiClient, parser:ResponseParser) extends Reposito
       .getUserPhotos(nsid, page, perpage)(token, ec)
       .map(_.flatMap(json => parser.getPhotosWithCollectionInfo(json)))
 
+  def getPhotoFavs(photoId: String, owner: String, token: UserToken, page: Int = 1, perpage: Int = 50)
+                  (implicit ec: ExecutionContext): Future[Option[(CollectionInfo, Seq[PhotoFavourite])]] =
+    apiClient
+      .getPhotoFavs(photoId, page, perpage)(token, ec)
+      .map(_.flatMap(json => parser.getPhotoFavouritesWithCollectionInfo(json, owner)))
+
+
 }

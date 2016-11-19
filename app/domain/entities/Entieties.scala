@@ -3,9 +3,7 @@ package domain.entities
 import java.util.UUID
 
 import org.joda.time.DateTime
-/**
- *
- */
+import utils.TimeX
 
 case class UserToken(token:String, secret:String)
 
@@ -17,8 +15,11 @@ case class AppUserDetail(nsid:String, detail_key:String, detail_value:String)
 
 case class Contact(nsid:String, username:String, contactOf:String)
 
-case class PhotoExcerpt(id:String, title:String, owner:String, owner_name:String, date_upload:String, date_taken:String, count_views:Int, count_faves:Int, count_comments:Int, tags:String, machine_tags:String, urls:PhotoUrls)
-{
+case class PhotoExcerpt(id:String, title:String, owner:String, owner_name:String, date_upload:String, date_taken:String, count_views:Int, count_faves:Int, count_comments:Int, tags:String, machine_tags:String, urls:PhotoUrls) {
+
+  val points: Double = count_faves + count_comments * 1.5
+
+  val month_upload: String = TimeX.unixToYM(date_upload)
 
   lazy val tagsList = {parseTags(tags)}
 
@@ -30,7 +31,11 @@ case class PhotoExcerpt(id:String, title:String, owner:String, owner_name:String
 
 }
 
-case class Favourite(photo: PhotoExcerpt, faved_by: String, date_faved:String)
+case class Favourite(photo: PhotoExcerpt, faved_by: String, date_faved:String) {
+  val month_faved = TimeX.unixToYM(date_faved)
+}
+
+case class PhotoFavourite(photoId: String, owner: String, faved_by: String, username: String, realname: String, date_faved: String)
 
 case class CollectionInfo(page:Int, pages:Int, perPage: Int, total: Int)
 
@@ -59,6 +64,8 @@ case class Dashboard(nsid: String, id:UUID, created_at: DateTime)
 case class FavTagStats(tag: String, count: Int, photos:Seq[Favourite])
 
 case class FavOwnerStats(owner: String, owner_name: String, count: Int, photos:Seq[Favourite])
+
+case class PhotoTagStats(tag: String, count: Int, avgPoints: Double, topAvgPoints: Double, photos: Seq[PhotoExcerpt])
 
 object PhotoExcerpt
 {

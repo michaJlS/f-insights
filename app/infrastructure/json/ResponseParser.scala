@@ -42,6 +42,23 @@ class ResponseParser {
 
     } yield UserInfo(id, nsid, username, fullname, photosurl, uploads, firstupload)
 
+  def getPhotoFavourite(json: JsValue, photoId: String, owner: String): Option[PhotoFavourite] =
+    for {
+      favedBy <- (json \ "nsid").asOpt[String]
+      username <- (json \ "username").asOpt[String]
+      realname <- (json \ "realname").asOpt[String]
+      date_faved <- (json \ "favedate").asOpt[String]
+    } yield PhotoFavourite(photoId, owner, favedBy, username, realname, date_faved)
+
+  def getPhotoFavourites(json: JsValue, owner: String): Option[Seq[PhotoFavourite]] =
+    for {
+      photo <- (json \ "photo").toOption
+      photoId <- (photo \ "id" ).asOpt[String]
+      people <- (photo \ "person" ).toOption.collect({
+        case JsArray(x) => x
+      })
+    } yield people.map(js => getPhotoFavourite(js, photoId, owner)).collect({ case Some(x) => x})
+
   def getCollectionInfo(json:JsValue, root:String) =
     for {
       ci <- (json \ root).toOption
@@ -54,6 +71,8 @@ class ResponseParser {
   def getPhotosCollectionInfo(json:JsValue):Option[CollectionInfo] = getCollectionInfo(json, "photos")
 
   def getContactsCollectionInfo(json:JsValue):Option[CollectionInfo] = getCollectionInfo(json, "contacts")
+
+  def getPhotoFavouritesCollectionInfo(json: JsValue) = getCollectionInfo(json, "photo")
 
   // // https://www.flickr.com/services/api/misc.urls.html
   def getPhotoExcerpt(json:JsValue):Option[PhotoExcerpt] =
@@ -131,6 +150,12 @@ class ResponseParser {
     for {
       info <- getPhotosCollectionInfo(json)
       photos <- getPhotos(json)
+    } yield (info, photos)
+
+  def getPhotoFavouritesWithCollectionInfo(json: JsValue, owner: String): Option[(CollectionInfo, Seq[PhotoFavourite])] =
+    for {
+      info <- getPhotoFavouritesCollectionInfo(json)
+      photos <- getPhotoFavourites(json, owner)
     } yield (info, photos)
 
 }

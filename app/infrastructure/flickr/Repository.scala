@@ -23,29 +23,27 @@ trait Repository
                    (implicit ec: ExecutionContext): Future[Option[(CollectionInfo, Seq[PhotoExcerpt])]]
 
   def getAllUserPublicFavoritesSequentially(nsid: String, token: UserToken, favedBefore: Option[String] = None, favedAfter: Option[String] = None)
-                                           (implicit executor:ExecutionContext): Future[Option[Seq[Favourite]]] = {
-    def load(page:Int, all:Seq[Favourite] = Seq[Favourite]()): OptionT[Future, Seq[Favourite]] =
-      OptionT(getUserPublicFavorites(nsid, token, page, 500, favedBefore, favedAfter))
-        .flatMap { case (info, c) =>
-          if (page >= info.pages)
-            OptionT.apply[Future, Seq[Favourite]](Future.successful{Some(all ++ c)})
-          else
-            load(page + 1, all ++ c)
-        }
-
-    load(1).run
-  }
+                                           (implicit executor:ExecutionContext): Future[Option[Seq[Favourite]]] =
+    loadSequentialy((page: Int) => getUserPublicFavorites(nsid, token, page, 500, favedBefore, favedAfter))
 
   def getAllUserPublicFavorites(nsid: String, token: UserToken)(implicit ec: ExecutionContext): Future[Option[Seq[Favourite]]] =
-    parallelLoader((page: Int) => getUserPublicFavorites(nsid, token, page, 500))
+    loadParallely((page: Int) => getUserPublicFavorites(nsid, token, page, 500))
 
   def getAllUserPublicContacts(nsid: String, token: UserToken)(implicit executor: ExecutionContext): Future[Option[Seq[Contact]]] =
-    parallelLoader((page: Int) => getUserPublicContacts(nsid, token, page, 1000))
+    loadParallely((page: Int) => getUserPublicContacts(nsid, token, page, 1000))
 
   def getAllUserPhotos(nsid: String, token: UserToken)(implicit executor: ExecutionContext): Future[Option[Seq[PhotoExcerpt]]] =
-    parallelLoader((page: Int) => getUserPhotos(nsid, token, page, 500))
+    loadParallely((page: Int) => getUserPhotos(nsid, token, page, 500))
 
-  protected def parallelLoader[T](f: (Int => Future[Option[(CollectionInfo, Seq[T])]]))
+
+  def getPhotoFavs(photoId: String, owner: String, token: UserToken, page: Int = 1, perpage: Int = 50)
+                  (implicit ec: ExecutionContext): Future[Option[(CollectionInfo, Seq[PhotoFavourite])]]
+
+  def getAllPhotoFavs(photoId: String, owner: String, token: UserToken)
+                     (implicit ec: ExecutionContext): Future[Option[Seq[PhotoFavourite]]] =
+    loadSequentialy((page: Int) => getPhotoFavs(photoId, owner, token, page, 50))
+
+  protected def loadParallely[T](f: (Int => Future[Option[(CollectionInfo, Seq[T])]]))
                                (implicit ec: ExecutionContext): Future[Option[Seq[T]]] =
     OptionT(f(1))
       .flatMapF { case (info, coll) =>
@@ -58,5 +56,22 @@ trait Repository
       .filter(s => !s.contains(None))
       .map(_.map(_.get).flatten)
       .run
+
+  private def loadSequentialy[T](f: (Int => Future[Option[(CollectionInfo, Seq[T])]]))
+                                (implicit ec: ExecutionContext): Future[Option[Seq[T]]] = {
+    def load(page: Int, all: Seq[T] = Seq.empty): OptionT[Future, Seq[T]] = {
+      OptionT(f(page))
+        .flatMap { case (info, c) =>
+          val newAll = all ++ c
+          if (page >= info.pages)
+            OptionT.apply[Future, Seq[T]](Future.successful(Some(newAll)))
+          else
+            load(page + 1, newAll)
+        }
+
+    }
+
+    load(1).run
+  }
 
 }

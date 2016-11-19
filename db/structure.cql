@@ -69,3 +69,14 @@ CREATE TABLE photos (
     urls map<varchar, varchar>,
     PRIMARY KEY ((dashboard_id), photo_id)
 );
+
+CREATE TABLE photo_favourites (
+    dashboard_id uuid,
+    photo_id varchar,
+    owner varchar,
+    faved_by varchar,
+    username varchar,
+    realname varchar,
+    date_faved varchar,
+    PRIMARY KEY ((dashboard_id), photo_id, faved_by)
+);

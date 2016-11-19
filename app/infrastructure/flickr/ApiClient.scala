@@ -53,6 +53,20 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey)
       )
     )
 
+  def getPhotoFavs(photoId: String, page: Int = 1, perpage: Int = 50)
+                  (implicit token: UserToken, ec: ExecutionContext): Future[Option[JsValue]] =
+    doRequest(
+      "flickr.photos.getFavorites",
+      Map(
+        "photo_id" -> photoId,
+        "page" -> page.toString,
+        "per_page" -> perpage.toString
+      )
+    )
+
+  def getPhotoComments(photoId: String)(implicit token: UserToken, ec: ExecutionContext): Future[Option[JsValue]] =
+    doRequest("flickr.photos.comments.getList", Map("photo_id" -> photoId))
+
   private def doRequest(apiMethod: String, params: Map[String, String] = Map.empty, paramsOpt: Map[String, Option[String]] = Map.empty)
                        (implicit token: UserToken, executionContext: ExecutionContext):Future[Option[JsValue]] =
     getRequest()

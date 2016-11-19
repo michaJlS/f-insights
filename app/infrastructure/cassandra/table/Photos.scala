@@ -6,8 +6,7 @@ import java.util.UUID
 import domain.entities.{PhotoExcerpt, PhotoUrls}
 
 
-class Photos extends CassandraTable[Photos, PhotoExcerpt]
-{
+class Photos extends CassandraTable[Photos, PhotoExcerpt] {
 
   override lazy val tableName = "photos"
 
@@ -32,8 +31,7 @@ class Photos extends CassandraTable[Photos, PhotoExcerpt]
 }
 
 
-abstract class ConcretePhotos extends Photos with RootConnector
-{
+abstract class ConcretePhotos extends Photos with RootConnector {
 
   def insertPhoto(dashboard_id: UUID, photo: PhotoExcerpt) = {
     insert.
@@ -54,10 +52,9 @@ abstract class ConcretePhotos extends Photos with RootConnector
       map(_ => true)
   }
 
-  def getByDashboardId(dashboard_id: UUID)  = {
+  def getByDashboardId(dashboard_id: UUID) =
     select.
       where(_.dashboard_id eqs dashboard_id).
       fetch()
-  }
 
 }

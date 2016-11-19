@@ -41,4 +41,12 @@ trait AppRepository
   def insertUserPhotos(dashboardId:UUID, photos: Seq[PhotoExcerpt])(implicit executor:ExecutionContext) = Future.sequence(photos.map(insertUserPhoto(dashboardId, _))).map(_ => true)
 
   def getPhotosByDashboardId(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[PhotoExcerpt]]
+
+  def insertPhotoFavourite(dashboardId:UUID, photoFav: PhotoFavourite)(implicit executor:ExecutionContext): Future[Boolean]
+
+  def getPhotoFavouritesByDashboardId(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[PhotoFavourite]]
+
+  def insertPhotoFavourites(dashboardId:UUID, photoFavs: Seq[PhotoFavourite])(implicit executor:ExecutionContext): Future[Boolean] =
+    Future.sequence(photoFavs.map(insertPhotoFavourite(dashboardId, _))).map(_ => true)
+
 }
