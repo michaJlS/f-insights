@@ -3,6 +3,18 @@
     <div class="profile">
         Hi {{user.fullname}}
         <img src="http://flickr.com/buddyicons/{{user.nsid}}.jpg">
-        <a href="#" class="logout">[Logout]</a>
+
+        <div class="dropdown" style="float: right">
+            <a href="#" class=" dropdown-toggle"  id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <span class="glyphicon glyphicon-cog"></span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                <li><a href="#" class="update-dashboard">Update dashboard</a></li>
+                <li><a href="/auth/logout" class="logout">Logout</a></li>
+            </ul>
+        </div>
+
     </div>
+
+
 </div>
