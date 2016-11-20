@@ -1,7 +1,7 @@
 package controllers
 
 import java.util.Calendar
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import domain.entities.UserToken
 import infrastructure.flickr.ApiRepository
@@ -13,10 +13,9 @@ import play.api.Play._
 
 import scala.concurrent.Future
 
-
+@Singleton
 class Application @Inject() (apiClient: WSClient, repository: ApiRepository) extends Controller with Base
 {
-
 
   val context = defaultContext
 
@@ -39,8 +38,5 @@ class Application @Inject() (apiClient: WSClient, repository: ApiRepository) ext
   def test = Action.async( implicit request => {
     Future.successful { Ok("nanana") }
   } )
-
-
-
 
 }

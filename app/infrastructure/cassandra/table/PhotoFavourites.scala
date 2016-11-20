@@ -7,7 +7,7 @@ import domain.entities.{Favourite, PhotoFavourite}
 
 class PhotoFavourites extends CassandraTable[PhotoFavourites, PhotoFavourite]{
 
-  override lazy val tableName = "favourites"
+  override lazy val tableName = "photo_favourites"
 
   object dashboard_id extends UUIDColumn(this) with PrimaryKey[UUID]
   object photo_id extends StringColumn(this) with ClusteringOrder[String]

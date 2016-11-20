@@ -1,8 +1,10 @@
 package controllers
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+import akka.actor.{ActorSystem, Props}
 import controllers.actions._
+import controllers.actors.messages.PreloadPhotosFavs
 import domain.entities.Dashboard
 import domain.service.{DashboardService, Stats}
 import infrastructure.cassandra.FlickrAssistantDb
@@ -16,10 +18,12 @@ import scala.concurrent.Future
 import scalaz.Scalaz._
 import scalaz._
 
-class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiRepository) extends Controller
+@Singleton
+class Api @Inject() (system: ActorSystem, apiClient: WSClient, db:FlickrAssistantDb, repository: ApiRepository) extends Controller
 {
 
   val context = defaultContext
+  val faManager = system.actorOf(Props(new actors.Manager(db, repository)), "famanager")
   val dashboardService = new DashboardService(db)
   val stats = new Stats
 
@@ -84,7 +88,6 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
     Future.successful {InternalServerError(Json.toJson("Not yet implemented")) }
   } )
 
-
   def preload(nsid:String) = myActionTpl(nsid).async( implicit request => {
     val futureFavs = repository.getAllUserPublicFavorites(nsid, request.token)
     val futureContacts = repository.getAllUserPublicContacts(nsid, request.token)
@@ -101,7 +104,13 @@ class Api @Inject() (apiClient: WSClient, db:FlickrAssistantDb, repository: ApiR
         case _ => Future.successful {None}
       }).
       map({
-        case Some(dashboardId) => Created(Json.toJson("ok"))
+        case Some(dashboardId) => {
+          data.foreach {
+            case (_, _, Some(photos)) => faManager ! PreloadPhotosFavs(request.token, dashboardId, nsid, photos.map(_.id))
+            case _ => ()
+          }
+          Created(Json.toJson("ok"))
+        }
         case _ => InternalServerError(Json.toJson("Something went wrong."))
       })
 
