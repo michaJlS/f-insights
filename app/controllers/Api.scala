@@ -24,8 +24,8 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db:FlickrAssistan
 
   val context = defaultContext
   val faManager = system.actorOf(Props(new actors.Manager(db, repository)), "famanager")
-  val dashboardService = new DashboardService(db)
   val stats = new Stats
+  val dashboardService = new DashboardService(db, stats)
 
   import infrastructure.json.JsonWrites._
 
@@ -81,11 +81,32 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db:FlickrAssistan
     }
       .map(dashboardService.filterDateRange(_, fromTimestamp, toTimestamp))
       .map(favs => Ok(Json.toJson(stats.favsOwnersStats(favs, threshold))))
-      .getOrElse(InternalServerError(Json.toJson("Error during preparing stats of favs tags")))
+      .getOrElse(InternalServerError(Json.toJson("Error during preparing stats of favs tags.")))
   } )
 
-  def statsUserTags(nsid:String) = Action.async( implicit request => {
-    Future.successful {InternalServerError(Json.toJson("Not yet implemented")) }
+  def monthlyStats(nsid: String) = myActionTpl(nsid).async( implicit request => {
+    OptionT(dashboardService.getMonthlyStatsFromLastDashboard(nsid))
+      .map(stats => Ok(Json.toJson(stats)))
+      .getOrElse(InternalServerError(Json.toJson("Error during preparing monthly stats.")))
+  } )
+
+  def statsUserTags(nsid: String) = myActionTpl(nsid).async( implicit request => {
+    OptionT(dashboardService.getUserPhotosFromLastDashboard(nsid))
+      .map(photos => Ok(Json.toJson(stats.popularTags(photos))))
+      .getOrElse(InternalServerError(Json.toJson("Error during preparing stats of tags.")))
+  } )
+
+  def statsFavingUsers(nsid: String) = myActionTpl(nsid).async( implicit request => {
+    val nonContactsOnly = request.getQueryString("non_contacts") == Some("true")
+
+    OptionT {
+      if (nonContactsOnly)
+        dashboardService.getReceivedFavouritesForNonCotacts(nsid)
+      else
+        dashboardService.getReceivedFavourites(nsid)
+    }
+      .map(favs => Ok(Json.toJson(stats.favingUsers(favs))))
+      .getOrElse(InternalServerError(Json.toJson("Error during preparing stats of faving users.")))
   } )
 
   def preload(nsid:String) = myActionTpl(nsid).async( implicit request => {

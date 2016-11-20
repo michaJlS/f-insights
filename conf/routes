@@ -24,7 +24,8 @@ GET     /api/user/contacts/:nsid   controllers.Api.userGetContacts(nsid: String)
 GET     /api/stats/favs/:nsid/tags       controllers.Api.statsFavsTags(nsid: String)
 GET     /api/stats/favs/:nsid/owners     controllers.Api.statsFavsOwners(nsid: String)
 GET     /api/stats/user/:nsid/tags       controllers.Api.statsUserTags(nsid: String)
-
+GET     /api/stats/user/:nsid/monthly    controllers.Api.monthlyStats(nsid: String)
+GET     /api/stats/user/:nsid/faving     controllers.Api.statsFavingUsers(nsid: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file:Asset)

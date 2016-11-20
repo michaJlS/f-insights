@@ -31,24 +31,28 @@ case class PhotoExcerpt(id:String, title:String, owner:String, owner_name:String
 
 }
 
+object PhotoExcerpt {
+  val medtiaTypePhoto = "photo"
+}
+
 case class Favourite(photo: PhotoExcerpt, faved_by: String, date_faved:String) {
   val month_faved = TimeX.unixToYM(date_faved)
 }
 
-case class PhotoFavourite(photoId: String, owner: String, faved_by: String, username: String, realname: String, date_faved: String)
+case class PhotoFavourite(photoId: String, owner: String, faved_by: String, username: String, realname: String, date_faved: String) {
+  val month_faved = TimeX.unixToYM(date_faved)
+}
 
 case class CollectionInfo(page:Int, pages:Int, perPage: Int, total: Int)
 
 case class FavouritesColectionInfo()
 
 // https://www.flickr.com/services/api/misc.urls.html
-case class PhotoUrls(largeSquareThumb:String = "", largeThumb:String = "", small:String = "", large:String = "")
-{
+case class PhotoUrls(largeSquareThumb:String = "", largeThumb:String = "", small:String = "", large:String = "") {
   def toMap = Map("large_square_thumb" -> largeSquareThumb, "large_thumb" -> largeThumb, "small" -> small, "large" -> large)
 }
 
-object PhotoUrls
-{
+object PhotoUrls {
 
   def apply(m:Map[String, String]):PhotoUrls = PhotoUrls(
     largeSquareThumb = m.getOrElse("large_square_thumb", ""),
@@ -67,9 +71,10 @@ case class FavOwnerStats(owner: String, owner_name: String, count: Int, photos:S
 
 case class PhotoTagStats(tag: String, count: Int, avgPoints: Double, topAvgPoints: Double, photos: Seq[PhotoExcerpt])
 
-object PhotoExcerpt
-{
+case class FavingUserStats(user: String, username: String, realname: String, count: Int)
 
-  val medtiaTypePhoto = "photo"
+case class MonthlyStats(month: String, uploaded: Int = 0, faved: Int = 0, gotFavs: Int = 0)
 
+object MonthlyStats {
+  implicit val ordering: Ordering[MonthlyStats] = Ordering.by(_.month)
 }

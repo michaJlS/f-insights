@@ -102,4 +102,44 @@ object JsonWrites
       def writes(contacts: Seq[Contact]) = JsArray(contacts.map(Json.toJson(_)))
     }
 
+  implicit val monthlyStatsWrites = new Writes[MonthlyStats] {
+    def writes(stats: MonthlyStats) = Json.obj(
+      "month" -> stats.month,
+      "uploaded" -> stats.uploaded,
+      "faved" -> stats.faved,
+      "got_favs" -> stats.gotFavs
+    )
+  }
+
+  implicit val monthlyStatsSetWrites = new Writes[Seq[MonthlyStats]] {
+    def writes(stats: Seq[MonthlyStats]) = JsArray(stats.map(Json.toJson(_)))
+  }
+
+  implicit val photoTagStatsWrites = new Writes[PhotoTagStats] {
+    def writes(s: PhotoTagStats) = Json.obj(
+      "tag" -> s.tag,
+      "count" -> s.count,
+      "avg_points" -> s.avgPoints,
+      "top_avg_points" -> s.topAvgPoints,
+      "photos" -> s.photos
+    )
+  }
+
+  implicit val photosTagStatsWrites = new Writes[Seq[PhotoTagStats]] {
+    def writes(stats: Seq[PhotoTagStats]) = JsArray(stats.map(Json.toJson(_)))
+  }
+
+  implicit val favingUserStatsWrites = new Writes[FavingUserStats] {
+    def writes(s: FavingUserStats) = Json.obj(
+      "user" -> s.user,
+      "username" -> s.username,
+      "realname" -> s.realname,
+      "count" -> s.count
+    )
+  }
+
+  implicit val favingUsersStatsWrites = new Writes[Seq[FavingUserStats]] {
+    def writes(stats: Seq[FavingUserStats]) = JsArray(stats.map(Json.toJson(_)))
+  }
+
 }

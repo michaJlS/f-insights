@@ -5,17 +5,36 @@ import domain.entities._
 class Stats
 {
 
-  def uploadedByMonth(photos: Seq[PhotoExcerpt]) =
-    photos
-      .map(p => p.month_upload)
-      .groupBy(t => t)
-      .mapValues(_.size)
+  def favingUsers(photoFavs: Seq[PhotoFavourite], threshold: Int = 3): Seq[FavingUserStats] =
+    photoFavs
+      .groupBy(_.faved_by)
+      .map { case (by, favs) => {
+          val fav = favs(0)
+          FavingUserStats(by, fav.username, fav.realname, favs.size)
+      } }
+      .toSeq
+      .filter(_.count >= threshold)
 
-  def favedByMonth(favs: Seq[Favourite]) =
-    favs
-    .map(_.month_faved)
-    .groupBy(t => t)
-    .mapValues(_.size)
+  def monthlyStats(
+                    photos: Seq[PhotoExcerpt],
+                    favs: Seq[Favourite],
+                    gotFavs: Seq[PhotoFavourite]
+                  ): Seq[MonthlyStats] = {
+    val uploaded = uploadedByMonth(photos)
+    val faved = favedByMonth(favs)
+    val received = gotFavByMonth(gotFavs)
+
+    val stats = for {k <- uploaded.keySet ++ faved.keySet ++ received.keySet}
+      yield MonthlyStats(k, uploaded.getOrElse(k, 0), faved.getOrElse(k, 0), received.getOrElse(k, 0))
+
+    stats.toSeq.sorted
+  }
+
+  def uploadedByMonth(photos: Seq[PhotoExcerpt]): Map[String, Int] = byMonth(photos, (p:PhotoExcerpt) => p.month_upload)
+
+  def favedByMonth(favs: Seq[Favourite]): Map[String, Int] = byMonth(favs, (f:Favourite) => f.month_faved)
+
+  def gotFavByMonth(favs: Seq[PhotoFavourite]): Map[String, Int] = byMonth(favs, (f:PhotoFavourite) => f.month_faved)
 
   def popularTags(photos: Seq[PhotoExcerpt], threshold: Int = 3, top: Int = 10) =
     photos
@@ -24,7 +43,7 @@ class Stats
       .mapValues(_.map(_._2))
       .map { case (tag, ps) =>
           val topPs = getTopPhotosByPoints(ps, top)
-          PhotoTagStats(tag, photos.size, avgPoints(ps), avgPoints(topPs), topPs)
+          PhotoTagStats(tag, ps.size, avgPoints(ps), avgPoints(topPs), topPs)
       }
       .toSeq
       .filter(_.count> threshold)
@@ -40,9 +59,11 @@ class Stats
 
   def favsOwnersStats(photos: Seq[Favourite], threshold: Int = 0, top: Int = 10) =
     photos
-      .map(fav => (fav.photo.owner, fav.photo.owner_name, fav))
-      .groupBy(_._1)
-      .map(mapItem => FavOwnerStats(mapItem._1, mapItem._2(0)._2, mapItem._2.length, getTopFavs(mapItem._2.map(_._3).toSeq, top)))
+      .groupBy(_.photo.owner)
+      .map { case (owner, favs) => {
+        val photo = favs(0).photo
+        FavOwnerStats(owner, photo.owner_name, favs.size, getTopFavs(favs, top))
+      } }
       .toSeq
       .filter(_.count >= threshold)
 
@@ -53,5 +74,7 @@ class Stats
   private def avgPoints(photos: Seq[PhotoExcerpt]): Double = photos.foldLeft[Double](0.0)({
     case (total, photo) => total + photo.points
   }) / photos.size
+
+  private def byMonth[T](s: Seq[T], f:(T => String)): Map[String, Int] = s.map(f).groupBy(t => t).mapValues(_.size)
 
 }
