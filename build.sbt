@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   specs2 % Test
 )
 
-pipelineStages := Seq(digest)
+//pipelineStages := Seq(digest)
 
 val PhantomVersion = "1.22.0"
 

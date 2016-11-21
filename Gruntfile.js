@@ -21,13 +21,13 @@ module.exports = function(grunt) {
         options: {
             namespace: "FlickrAssistantTemplates",
             processName: function(filePath) {
-                return filePath.replace(/^app\/assets\/js\/templates\//, '').replace(/\.hbs$/, '');
+                return filePath.replace(/^clientside\/js\/templates\//, '').replace(/\.hbs$/, '');
             }
 
         },
         all: {
             files: {
-                "public/js/templates.js": ["app/assets/js/templates/*.hbs"]
+                "public/js/templates.js": ["clientside/js/templates/*.hbs"]
             }
         }
     };
@@ -36,10 +36,10 @@ module.exports = function(grunt) {
     config.less = {
         development: {
             options: {
-                paths: ["app/assets/style"]
+                paths: ["clientside/style"]
             },
             files: {
-                "public/css/main.css": "app/assets/style/main.less"
+                "public/css/main.css": "clientside/style/main.less"
             }
         }
     };
@@ -49,10 +49,10 @@ module.exports = function(grunt) {
     config.concat = {
         development: {
             files: {
-                "public/js/views.js": ["app/assets/js/views/*.js"],
-                "public/js/models.js": ["app/assets/js/models/*.js"],
-                "public/js/app.js": ["app/assets/js/app.js"],
-                "public/js/view-features.js": ["app/assets/js/viewfeatures/*.js"]
+                "public/js/views.js": ["clientside/js/views/*.js"],
+                "public/js/models.js": ["clientside/js/models/*.js"],
+                "public/js/app.js": ["clientside/js/app/app.js"],
+                "public/js/view-features.js": ["clientside/js/viewfeatures/*.js"]
             }
         }
     };
@@ -61,15 +61,15 @@ module.exports = function(grunt) {
 
     config.watch = {
        handlebars: {
-           files: ["app/assets/js/templates/*.hbs"],
+           files: ["clientside/js/templates/*.hbs"],
            tasks: ["handlebars"]
        },
        less: {
-            files: ["app/assets/style/*.less"],
+            files: ["clientside/style/*.less"],
             tasks: ["less"]
        },
        concat: {
-            files: ["app/assets/js/views/*.js", "app/assets/js/app.js", "app/assets/js/models/*.js"],
+            files: ["clientside/js/views/*.js", "clientside/js/app/app.js", "clientside/js/models/*.js"],
             tasks: ["concat"]
        }
     };

@@ -10,7 +10,9 @@ class Stats
       .groupBy(_.faved_by)
       .map { case (by, favs) => {
           val fav = favs(0)
-          FavingUserStats(by, fav.username, fav.realname, favs.size)
+          val first = favs.maxBy(_.date_faved).date_faved
+          val last = favs.minBy(_.date_faved).date_faved
+          FavingUserStats(by, fav.username, fav.realname, favs.size, first, last)
       } }
       .toSeq
       .filter(_.count >= threshold)

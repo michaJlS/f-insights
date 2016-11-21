@@ -71,7 +71,7 @@ case class FavOwnerStats(owner: String, owner_name: String, count: Int, photos:S
 
 case class PhotoTagStats(tag: String, count: Int, avgPoints: Double, topAvgPoints: Double, photos: Seq[PhotoExcerpt])
 
-case class FavingUserStats(user: String, username: String, realname: String, count: Int)
+case class FavingUserStats(user: String, username: String, realname: String, count: Int, firstFav: String, lastFav: String)
 
 case class MonthlyStats(month: String, uploaded: Int = 0, faved: Int = 0, gotFavs: Int = 0)
 
