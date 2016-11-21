@@ -48,6 +48,35 @@ FlickrAssistant.Views.DateRange = FlickrAssistant.BaseView.extend({
         return false;
     }
 });
+
+FlickrAssistant.Views.Timeline = FlickrAssistant.BaseView.extend({
+    stats: null,
+    template: "timeline",
+    initialize: function () {
+        this.stats = new FlickrAssistant.Collections.MonthlyStats(null, {"nsid": FlickrAssistant.Context.nsid});
+        this.stats.fetch({
+            success: this.render.bind(this)
+        });
+    },
+    serialize: function () {
+    console.log(this.stats.dataByYear());
+        var stats = [];
+        if (this.stats) {
+            stats = this.stats.dataByYear();
+            return {
+                "stats": stats,
+                "months": this.stats.months(),
+                "noStats": stats.length < 1,
+                "cssArr": ["odd", "even"]
+            };
+        } else {
+            return {
+                "noStats": true
+            };
+        }
+    }
+});
+
 FlickrAssistant.Views.TopFavedAuthors = FlickrAssistant.BaseView.extend({
     owners: null,
     ownersNoContacts: null,
@@ -237,6 +266,7 @@ FlickrAssistant.Views.Home = FlickrAssistant.BaseView.extend({
         }), true)
         this.setView(".faved-authors", new FlickrAssistant.Views.TopFavedAuthors(), true)
         this.setView(".faved-tags", new FlickrAssistant.Views.TopFavedTags(), true)
+        this.setView("#timeline", new FlickrAssistant.Views.Timeline(), true)
     },
     onFilterChange: function(from, to) {
         ['.faved-authors', '.faved-tags'].map(this.getView.bind(this)).forEach(function (vw) { vw.dateRangeChanged(from, to); });
@@ -274,6 +304,13 @@ FlickrAssistant.Views.Header = FlickrAssistant.BaseView.extend({
 });
 
 FlickrAssistant.Views.Nav = FlickrAssistant.BaseView.extend({
+    events: {
+        "click a": "navToTab"
+    },
+    navToTab: function(e) {
+        e.preventDefault();
+        jQuery(e.currentTarget).tab("show");
+    },
     template: "nav"
 });
 

@@ -60,11 +60,25 @@ header {
 
 }
 
+#menu {
+    background: #fff;
+    padding: 12px 0;
+
+    nav {
+        .basecontainer();
+    }
+}
+
 #main {
 
     .basecontainer();
 
-
+    .dashboard {
+        display: none;
+    }
+    .dashboard.active {
+        display: block;
+    }
 
 }
 
@@ -104,4 +118,43 @@ footer {
 
 .faved-filters {
     padding-top: 10px;
+}
+
+#timeline {
+
+    padding-top: 24px;
+
+    table, table td, table th {
+        border-color:  #808b96 ;
+    }
+
+    thead {
+        th {
+            color: #fff;
+            background:    #808b96  ;
+        }
+    }
+
+    tr.odd {
+        th { background:  #7fb3d5 ; color: #fff; }
+        td { background:  #eaf2f8 ;}
+    }
+
+    tr.even {
+        th { background:  #82e0aa ; color: #fff; }
+        td { background:  #eafaf1 ;}
+    }
+
+    td.num {
+        text-align: right;
+    }
+    th.month {
+        text-align: right;
+    }
+    th.year {
+        text-align: center;
+    }
+    th.what {
+        text-align: right;
+    }
 }

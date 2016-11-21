@@ -19,6 +19,10 @@ Handlebars.registerHelper("attr", function(val) {
     return val.replace('"', '&quot;')
 });
 
+Handlebars.registerHelper("alternate", function(i, what) {
+    return what[i % what.length];
+});
+
 
 var FlickrAssistant = {};
 FlickrAssistant.Models = {};
@@ -125,9 +129,8 @@ FlickrAssistant.App = function(config, context, templates) {
         layout = new FlickrAssistant.Views.Layout({
             el: "#layout",
             header: new FlickrAssistant.Views.Header(),
-            content: new FlickrAssistant.Views.Home()
-//            ,
-//            menu: new FlickrAssistant.Views.Nav()
+            content: new FlickrAssistant.Views.Home(),
+            menu: new FlickrAssistant.Views.Nav()
         });
     }
 

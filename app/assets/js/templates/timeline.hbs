@@ -1,0 +1,52 @@
+{{#if noStats}}
+    <p>Loading ...</p>
+{{else}}
+
+<table class="table table-condensed">
+    <thead>
+    <tr>
+        <th colspan="2"> </th>
+        {{#each months}}
+            <th class="month">{{ this }}</th>
+        {{/each}}
+    </tr>
+
+    </thead>
+
+    <tbody>
+    {{#each stats}}
+        <tr class="{{alternate @index ../cssArr}}">
+            <th rowspan="3" class="year">{{year}}</th>
+            <th title="Uploaded" class="what"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></th>
+            {{#each months}}
+                <td class="num" title="Uploaded">{{uploaded}}</td>
+            {{/each}}
+        </tr>
+
+        <tr class="{{alternate @index ../cssArr}}">
+            <th title="Favs" class="what"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></th>
+            {{#each months}}
+                <td class="num" title="Favs">{{got_favs}}</td>
+            {{/each}}
+        </tr>
+
+        <tr class="{{alternate @index ../cssArr}}">
+            <th title="Faved" class="what"><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></th>
+            {{#each months}}
+                <td class="num" title="Faved">{{faved}}</td>
+            {{/each}}
+        </tr>
+    {{/each}}
+    </tbody>
+
+</table>
+
+
+<p>
+    Number of:<br>
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>  uploaded photos
+    <span class="glyphicon glyphicon-star" aria-hidden="true"></span> received favs
+    <span class="glyphicon glyphicon-heart" aria-hidden="true"></span> faved photos
+</p>
+
+{{/if}}
