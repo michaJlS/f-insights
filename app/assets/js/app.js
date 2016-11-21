@@ -168,6 +168,3 @@ FlickrAssistant.App = function(config, context, templates) {
     }
 
 };
-
-
-

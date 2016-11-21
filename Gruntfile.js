@@ -46,6 +46,19 @@ module.exports = function(grunt) {
 
     config.less.production = config.less.development;
 
+    config.concat = {
+        development: {
+            files: {
+                "public/js/views.js": ["app/assets/js/views/*.js"],
+                "public/js/models.js": ["app/assets/js/models/*.js"],
+                "public/js/app.js": ["app/assets/js/app.js"],
+                "public/js/view-features.js": ["app/assets/js/viewfeatures/*.js"]
+            }
+        }
+    };
+
+    config.concat.production = config.concat.development;
+
     config.watch = {
        handlebars: {
            files: ["app/assets/js/templates/*.hbs"],
@@ -54,6 +67,10 @@ module.exports = function(grunt) {
        less: {
             files: ["app/assets/style/*.less"],
             tasks: ["less"]
+       },
+       concat: {
+            files: ["app/assets/js/views/*.js", "app/assets/js/app.js", "app/assets/js/models/*.js"],
+            tasks: ["concat"]
        }
     };
 
@@ -63,6 +80,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-contrib-handlebars");
     grunt.loadNpmTasks("grunt-contrib-less");
     grunt.loadNpmTasks("grunt-contrib-watch");
-    grunt.registerTask("default", ["bower", "handlebars", "less"]);
+    grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.registerTask("default", ["bower", "handlebars", "less", "concat"]);
 
 };

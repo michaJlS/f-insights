@@ -11,5 +11,5 @@ target
 /bower_components
 /project/project
 /public/vendor/*
-/public/js/templates.js
+/public/js/*
 /public/css/main.css

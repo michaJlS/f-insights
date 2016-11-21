@@ -17,7 +17,8 @@
     "grunt-bower-task": "~0.4",
     "grunt-contrib-handlebars": "~1.0",
     "grunt-contrib-watch": "~1.0",
-    "grunt-contrib-less": "~1.4"
+    "grunt-contrib-less": "~1.4",
+    "grunt-contrib-concat": "~1.0"
   },
   "private": true
 }
