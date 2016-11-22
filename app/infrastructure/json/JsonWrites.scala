@@ -135,7 +135,7 @@ object JsonWrites
       "username" -> s.username,
       "realname" -> s.realname,
       "count" -> s.count,
-      "frist_fav" -> s.firstFav,
+      "first_fav" -> s.firstFav,
       "last_fav" -> s.lastFav
     )
   }

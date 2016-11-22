@@ -10,12 +10,13 @@ class Stats
       .groupBy(_.faved_by)
       .map { case (by, favs) => {
           val fav = favs(0)
-          val first = favs.maxBy(_.date_faved).date_faved
-          val last = favs.minBy(_.date_faved).date_faved
+          val first = favs.minBy(_.date_faved).date_faved
+          val last = favs.maxBy(_.date_faved).date_faved
           FavingUserStats(by, fav.username, fav.realname, favs.size, first, last)
       } }
       .toSeq
       .filter(_.count >= threshold)
+      .sortBy(_.count * -1)
 
   def monthlyStats(
                     photos: Seq[PhotoExcerpt],
@@ -29,7 +30,7 @@ class Stats
     val stats = for {k <- uploaded.keySet ++ faved.keySet ++ received.keySet}
       yield MonthlyStats(k, uploaded.getOrElse(k, 0), faved.getOrElse(k, 0), received.getOrElse(k, 0))
 
-    stats.toSeq.sorted
+    stats.toSeq.sortBy(_.month)
   }
 
   def uploadedByMonth(photos: Seq[PhotoExcerpt]): Map[String, Int] = byMonth(photos, (p:PhotoExcerpt) => p.month_upload)
@@ -58,6 +59,7 @@ class Stats
       .map { case (tag, favs) => FavTagStats(tag, favs.size, getTopFavs(favs, top)) }
       .toSeq
       .filter(_.count >= threshold)
+      .sortBy(_.count * -1)
 
   def favsOwnersStats(photos: Seq[Favourite], threshold: Int = 0, top: Int = 10) =
     photos
@@ -68,10 +70,11 @@ class Stats
       } }
       .toSeq
       .filter(_.count >= threshold)
+      .sortBy(_.count * -1)
 
-  private def getTopFavs(favs: Seq[Favourite], n: Int = 10) = favs.sortBy(_.photo.count_faves).reverse.slice(0, n)
+  private def getTopFavs(favs: Seq[Favourite], n: Int = 10) = favs.sortBy(_.photo.count_faves * -1).slice(0, n)
 
-  private def getTopPhotosByPoints(photos: Seq[PhotoExcerpt], n: Int = 0): Seq[PhotoExcerpt] = photos.sortBy(_.points).reverse.slice(0, n)
+  private def getTopPhotosByPoints(photos: Seq[PhotoExcerpt], n: Int = 0): Seq[PhotoExcerpt] = photos.sortBy(_.points * -1).slice(0, n)
 
   private def avgPoints(photos: Seq[PhotoExcerpt]): Double = photos.foldLeft[Double](0.0)({
     case (total, photo) => total + photo.points

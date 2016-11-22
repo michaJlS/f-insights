@@ -74,7 +74,3 @@ case class PhotoTagStats(tag: String, count: Int, avgPoints: Double, topAvgPoint
 case class FavingUserStats(user: String, username: String, realname: String, count: Int, firstFav: String, lastFav: String)
 
 case class MonthlyStats(month: String, uploaded: Int = 0, faved: Int = 0, gotFavs: Int = 0)
-
-object MonthlyStats {
-  implicit val ordering: Ordering[MonthlyStats] = Ordering.by(_.month)
-}

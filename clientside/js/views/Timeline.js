@@ -8,7 +8,6 @@ FlickrAssistant.Views.Timeline = FlickrAssistant.BaseView.extend({
         });
     },
     serialize: function () {
-    console.log(this.stats.dataByYear());
         var stats = [];
         if (this.stats) {
             stats = this.stats.dataByYear();

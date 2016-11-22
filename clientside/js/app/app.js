@@ -2,6 +2,14 @@
 //var layout = new Backbone.Layout({ template: "#layout" });
 Backbone.Layout.configure({});
 
+Date.prototype.dmy = function() {
+  var mm = this.getMonth() + 1;
+  var dd = this.getDate();
+  if (mm<10) mm = "0" + mm;
+  if (dd<10) dd = "0" + dd;
+
+  return [dd, mm, this.getFullYear()].join('.'); // padding
+};
 
 Handlebars.registerHelper("debug", function(optionalValue) {
   console.log("Current Context");
@@ -23,6 +31,19 @@ Handlebars.registerHelper("alternate", function(i, what) {
     return what[i % what.length];
 });
 
+Handlebars.registerHelper("some", function() {
+    for (var i = 0;i<arguments.length;i++) {
+        if ("" !== arguments[i]) return arguments[i];
+    }
+    return "";
+});
+
+Handlebars.registerHelper("daterange", function(from, to) {
+    var df = (new Date(from * 1000)).dmy(), dt = new Date(to * 1000).dmy();
+
+    if (df == dt) return df;
+    else return df + " - " + dt
+});
 
 var FlickrAssistant = {};
 FlickrAssistant.Models = {};

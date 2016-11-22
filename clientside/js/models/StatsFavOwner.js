@@ -16,12 +16,5 @@ FlickrAssistant.Collections.StatsFavOwner = FlickrAssistant.CollectionReadOnly.e
     "url": function() {
         return "/api/stats/favs/" + this.nsid + "/owners";
     },
-   "model": FlickrAssistant.Models.StatsFavOwner,
-   "comparator": function(a, b) {
-        var ac = parseInt(a.get("count"));
-        var bc = parseInt(b.get("count"));
-        if (ac == bc) return 0;
-        if (ac > bc) return -1;
-        return 1;
-   }
+   "model": FlickrAssistant.Models.StatsFavOwner
 });
