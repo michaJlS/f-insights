@@ -32,10 +32,7 @@ FlickrAssistant.BaseView = Backbone.Layout.extend({
 FlickrAssistant.composeViews = function() {
     var args = Array.prototype.slice.call(arguments)
     return args.reduce(function(a, b) {
-        var c = _.extend(a, b);
-        var events = _.extend(a.events || {}, b.events || {})
-        c.events = events
-        return c
+        return _.extend({}, a, b, {events: _.extend({}, a.events || {}, b.events || {})});
     }, {})
 }
 

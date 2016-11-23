@@ -35,3 +35,11 @@ Handlebars.registerHelper("daterange", function(from, to) {
 Handlebars.registerHelper("f", function(f) {
     return f.toFixed(2);
 });
+
+Handlebars.registerHelper("following", function(whom, contacts) {
+   if (-1 === contacts.indexOf(whom)) {
+    return "";
+   }
+
+   return new Handlebars.SafeString('<span class="glyphicon glyphicon-user" aria-hidden="true"></span>');
+});

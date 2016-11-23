@@ -1,15 +1,12 @@
-<ul>
-
+<div>
     {{#each items}}
-        <li>
-            <strong>{{tag}}</strong> ({{count}} / {{f avg_points}} / {{f top_avg_points}})
-        </li>
-        <li>
+        <h5>
+            <a href="https://www.flickr.com/search/?sort=date-taken-desc&tags={{attr tag}}&user_id=27552342%40N02&view_all=1"><strong>{{tag}}</strong></a> ({{count}} / {{f avg_points}} / {{f top_avg_points}})
+        </h5>
+        <p>
             {{#each topphotos}}
                 <a href="https://www.flickr.com/photos/{{owner}}/{{id}}" target="_blank" title="{{attr title}} ({{count_faves}})"><img src="{{urls.largeSquareThumb}}"></a>
             {{/each}}
-
-        </li>
+        </p>
     {{/each}}
-
-</ul>
+</div>
