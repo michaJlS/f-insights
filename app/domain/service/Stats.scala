@@ -50,29 +50,31 @@ class Stats
       }
       .toSeq
       .filter(_.count> threshold)
+      .sortBy(_.topAvgPoints * -1)
 
   def favsTagsStats(photos: Seq[Favourite], threshold: Int = 0, top: Int = 10) =
     photos
-      .flatMap(fav => fav.photo.allTagsList.map((t:String) => {(t, fav)}))
+      .flatMap(fav => fav.photo.allTagsList.map((t:String) => {(t, fav.photo)}))
       .groupBy(_._1)
       .mapValues(_.map(_._2))
-      .map { case (tag, favs) => FavTagStats(tag, favs.size, getTopFavs(favs, top)) }
+      .map { case (tag, photos) => FavTagStats(tag, photos.size, getTopFavs(photos, top)) }
       .toSeq
       .filter(_.count >= threshold)
       .sortBy(_.count * -1)
 
   def favsOwnersStats(photos: Seq[Favourite], threshold: Int = 0, top: Int = 10) =
     photos
-      .groupBy(_.photo.owner)
-      .map { case (owner, favs) => {
-        val photo = favs(0).photo
-        FavOwnerStats(owner, photo.owner_name, favs.size, getTopFavs(favs, top))
+      .map(_.photo)
+      .groupBy(_.owner)
+      .map { case (owner, photos) => {
+        val photo = photos(0)
+        FavOwnerStats(owner, photo.owner_name, photos.size, getTopFavs(photos, top))
       } }
       .toSeq
       .filter(_.count >= threshold)
       .sortBy(_.count * -1)
 
-  private def getTopFavs(favs: Seq[Favourite], n: Int = 10) = favs.sortBy(_.photo.count_faves * -1).slice(0, n)
+  private def getTopFavs(photos: Seq[PhotoExcerpt], n: Int = 10) = photos.sortBy(_.count_faves * -1).slice(0, n)
 
   private def getTopPhotosByPoints(photos: Seq[PhotoExcerpt], n: Int = 0): Seq[PhotoExcerpt] = photos.sortBy(_.points * -1).slice(0, n)
 

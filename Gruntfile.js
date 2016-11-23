@@ -32,7 +32,6 @@ module.exports = function(grunt) {
         }
     };
 
-
     config.less = {
         development: {
             options: {
@@ -51,8 +50,10 @@ module.exports = function(grunt) {
             files: {
                 "public/js/views.js": ["clientside/js/views/*.js"],
                 "public/js/models.js": ["clientside/js/models/*.js"],
-                "public/js/app.js": ["clientside/js/app/app.js"],
-                "public/js/view-features.js": ["clientside/js/viewfeatures/*.js"]
+                "public/js/app.js": ["clientside/js/app/boot-vendors.js", "clientside/js/app/lib.js",
+                                     "clientside/js/app/hbars.js", "clientside/js/app/core.js",
+                                     "clientside/js/app/config.js", "clientside/js/app/app.js"],
+                "public/js/components.js": ["clientside/js/components/*.js"],
             }
         }
     };
@@ -69,7 +70,7 @@ module.exports = function(grunt) {
             tasks: ["less"]
        },
        concat: {
-            files: ["clientside/js/views/*.js", "clientside/js/app/app.js", "clientside/js/models/*.js"],
+            files: ["clientside/js/views/*.js", "clientside/js/app/*.js", "clientside/js/models/*.js", "clientside/js/components/*.js"],
             tasks: ["concat"]
        }
     };

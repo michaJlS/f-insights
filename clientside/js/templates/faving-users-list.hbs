@@ -1,0 +1,12 @@
+<ul>
+
+    {{#each items}}
+        <li>
+            <a href="https://www.flickr.com/photos/{{user}}/" target="_blank"><img src="http://flickr.com/buddyicons/{{user}}.jpg"> <strong>{{some realname username}}</strong></a></td>
+            <span class="count">({{count}})</span>
+            {{daterange first_fav last_fav}}
+
+        </li>
+    {{/each}}
+
+</ul>

@@ -11,7 +11,7 @@ FlickrAssistant.Collections.PhotoTagStats = FlickrAssistant.CollectionReadOnly.e
        this.nsid = options.nsid;
    },
    "url": function() {
-       return "/api/stats/user/" + this.nsid + "/PhotoTagStats";
+       return "/api/stats/user/" + this.nsid + "/tags";
    },
   "model": FlickrAssistant.Models.PhotoTagStats
 });
