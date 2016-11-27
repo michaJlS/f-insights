@@ -49,4 +49,25 @@ trait AppRepository
   def insertPhotoFavourites(dashboardId:UUID, photoFavs: Seq[PhotoFavourite])(implicit executor:ExecutionContext): Future[Boolean] =
     Future.sequence(photoFavs.map(insertPhotoFavourite(dashboardId, _))).map(_ => true)
 
+  def insertFavingUser(dashboardId: UUID, user: FavingUserStats)(implicit executor:ExecutionContext): Future[Boolean]
+
+  def insertFavingUsers(dashboardId: UUID, users: Seq[FavingUserStats])(implicit executor:ExecutionContext): Future[Boolean] =
+    Future.sequence(users.map(insertFavingUser(dashboardId, _))).map(_ => true)
+
+  def getFavingUsers(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[FavingUserStats]]
+
+  def insertRelative(dashboardId: UUID, relative: Relative)(implicit executor:ExecutionContext): Future[Boolean]
+
+  def insertRelatives(dashboardId: UUID, relatives: Seq[Relative])(implicit executor:ExecutionContext): Future[Boolean] =
+    Future.sequence(relatives.map(insertRelative(dashboardId, _))).map(_ => true)
+
+  def getRelatives(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[Relative]]
+
+  def insertMonthlyStats(dashboardId: UUID, monthlyStats: MonthlyStats)(implicit executor:ExecutionContext): Future[Boolean]
+
+  def insertTimeline(dashboardId: UUID, timeline: Seq[MonthlyStats])(implicit executor:ExecutionContext): Future[Boolean] =
+    Future.sequence(timeline.map(insertMonthlyStats(dashboardId, _))).map(_ => true)
+
+  def getTimeline(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[MonthlyStats]]
+
 }

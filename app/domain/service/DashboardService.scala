@@ -16,6 +16,21 @@ class DashboardService(appRepository: AppRepository, stats: Stats) {
       .flatMap(detail => OptionT(appRepository.getDashboard(nsid, detail.detail_value)))
       .run
 
+  def createEmptyDashboard(nsid: String)(implicit executor:ExecutionContext) = {
+    val dashboard = Dashboard(nsid, UUID.randomUUID(), DateTime.now())
+    val dashboardInfo = AppUserDetail(nsid, DashboardService.dashboard_property_name, dashboard.id.toString)
+
+    appRepository
+      .insertDashboard(dashboard)
+      .flatMap {ok =>
+        if (ok)
+          appRepository.insertUserDetail(dashboardInfo)
+        else
+          Future.successful(false)
+      }
+      .map(if (_) Some(dashboard.id) else None)
+  }
+
   def buildNewDashboard(
                          nsid: String,
                          favs: Seq[Favourite],
@@ -23,7 +38,7 @@ class DashboardService(appRepository: AppRepository, stats: Stats) {
                          photos: Seq[PhotoExcerpt]
                        )
                        (implicit executor:ExecutionContext) = {
-    val dashboard = new Dashboard(nsid, UUID.randomUUID(), DateTime.now())
+    val dashboard = Dashboard(nsid, UUID.randomUUID(), DateTime.now())
     val dashboardInfo = AppUserDetail(nsid, DashboardService.dashboard_property_name, dashboard.id.toString)
 
     appRepository.

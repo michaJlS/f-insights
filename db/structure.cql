@@ -47,7 +47,7 @@ CREATE TABLE favourites (
     tags varchar,
     machine_tags varchar,
     urls map<varchar, varchar>,
-    PRIMARY KEY ((dashboard_id), photo_id)
+    PRIMARY KEY ((dashboard_id), faved_by, photo_id)
 );
 
 -- phantom does not support it yet:(
@@ -67,7 +67,7 @@ CREATE TABLE photos (
     tags varchar,
     machine_tags varchar,
     urls map<varchar, varchar>,
-    PRIMARY KEY ((dashboard_id), photo_id)
+    PRIMARY KEY ((dashboard_id), owner, photo_id)
 );
 
 CREATE TABLE photo_favourites (
@@ -78,5 +78,41 @@ CREATE TABLE photo_favourites (
     username varchar,
     realname varchar,
     date_faved varchar,
-    PRIMARY KEY ((dashboard_id), photo_id, faved_by)
+    PRIMARY KEY ((dashboard_id), owner, photo_id, faved_by)
+);
+
+CREATE TABLE relatives (
+    dashboard_id uuid,
+    nsid varchar,
+    username varchar,
+    realname varchar,
+    followed boolean,
+    faved int,
+    faving int,
+    contacts int,
+    photos int,
+    avg_points double,
+    top_avg_points double,
+    top_tags list<varchar>,
+    PRIMARY KEY ((dashboard_id), nsid)
+);
+
+CREATE TABLE timeline (
+    dashboard_id uuid,
+    month varchar,
+    uploaded int,
+    faved int,
+    got_favs int,
+    PRIMARY KEY ((dashboard_id), month)
+);
+
+CREATE TABLE faving_users (
+    dashboard_id uuid,
+    user varchar,
+    username varchar,
+    realname varchar,
+    count int,
+    first_fav varchar,
+    last_fav varchar,
+    PRIMARY KEY ((dashboard_id), user, count)
 );

@@ -1,9 +1,12 @@
 package controllers.actors
+import java.util.concurrent.TimeUnit
+
 import akka.actor.{Actor, ActorRef, Props}
+import akka.util.Timeout
 import infrastructure.flickr.ApiRepository
 
 import scala.collection.mutable.{Queue => MQueue}
-import messages.{LoadedPhotoFavs, PreloadPhotoFavs}
+import messages._
 
 import scalaz._
 import Scalaz._
@@ -14,7 +17,7 @@ class FlickrClient(apiRepo: ApiRepository, parallelism: Int = 4) extends Actor{
 
   val availableWorkers: MQueue[ActorRef] = MQueue.empty
 
-  val workBuffer: MQueue[PreloadPhotoFavs] = MQueue.empty
+  val workBuffer: MQueue[PreloadTask] = MQueue.empty
 
   override def receive = {
     case Ready => {
@@ -23,7 +26,7 @@ class FlickrClient(apiRepo: ApiRepository, parallelism: Int = 4) extends Actor{
       else
         sender ! workBuffer.dequeue
     }
-    case msg: PreloadPhotoFavs => {
+    case msg: PreloadTask => {
       if (availableWorkers.isEmpty)
         workBuffer += msg
       else
@@ -46,18 +49,52 @@ class FlickrClient(apiRepo: ApiRepository, parallelism: Int = 4) extends Actor{
 }
 
 object FlickrClient {
+  implicit val timeout = new Timeout(1, TimeUnit.SECONDS)
 
-  class Worker(repo: ApiRepository) extends Actor{
+  class Worker(repo: ApiRepository) extends Actor {
 
     import play.api.libs.concurrent.Execution.Implicits._
 
     override def receive = {
-      case msg: PreloadPhotoFavs => {
+      case msg: PreloadPhotoFavs =>
         OptionT(repo.getAllPhotoFavs(msg.photo, msg.owner, msg.token))
-          .map { favs => msg.replyTo ! LoadedPhotoFavs(msg.dashboardId, favs) }
+          .flatMapF { favs => loaded(LoadedPhotoFavs(msg.dashboardId, msg.photo, favs)) }
           .map { _ => iAmReady }
           .run
-      }
+      case msg: PreloadFavs =>
+        OptionT(repo.getAllUserPublicFavoritesSequentially(msg.nsid, msg.token))
+          .flatMapF { favs => loaded(LoadedFavs(msg.dashboardId, favs)) }
+          .map { _ => iAmReady }
+          .run
+      case msg: PreloadContacts =>
+        OptionT(repo.getAllUserPublicContactsSequentially(msg.nsid, msg.token))
+          .flatMapF { contacts => loaded(LoadedContacts(msg.dashboardId, contacts)) }
+          .map { _ => iAmReady }
+          .run
+      case msg: PreloadPhotos =>
+        OptionT(repo.getAllUserPhotosSequentially(msg.nsid, msg.token))
+          .flatMapF(photos => {
+            loaded(LoadedPhotos(msg.dashboardId, photos))
+            context.actorSelection("../../preloader").resolveOne.map(_ ! PreloadPhotosFavs(msg.token, msg.dashboardId, msg.nsid, photos.map(_.id)))
+          })
+          .map { _ => iAmReady }
+          .run
+      case msg: PreloadRelativeContacts =>
+        OptionT(repo.getUserPublicContactsSequentially(msg.nsid, msg.token, 10))
+          .flatMapF { res => loaded(LoadedRelativeContacts(msg.dashboardId, msg.nsid, res.total, res.items)) }
+          .map { _ => iAmReady }
+          .run
+      case msg: PreloadRelativePhotos =>
+        OptionT(repo.getUserPhotosSequentially(msg.nsid, msg.token, 20))
+          .flatMapF { res => loaded(LoadedRelativePhotos(msg.dashboardId, msg.nsid, res.total, res.items)) }
+          .map { _ => iAmReady }
+          .run
+
+    }
+
+    private def loaded[T](newMsg: T) = {
+      context.actorSelection("../../dbupdater").resolveOne.map(_ ! newMsg)
+      context.actorSelection("../../statistician").resolveOne.map(_ ! newMsg)
     }
 
     private def iAmReady() = context.parent ! Ready

@@ -1,6 +1,6 @@
 Disclaimer
 ===========
-This is my playground for learning Scala, Play framework, Cassandra and whatever else I will decide to include
+This is my playground for learning Scala, Play framework, Akka & Cassandra or whatever else I will decide to include
 in this project in future.
 
 

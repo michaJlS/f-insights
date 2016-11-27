@@ -23,11 +23,10 @@ class Contacts extends CassandraTable[Contacts, Contact]
 
 }
 
-
 abstract class ConcreteContacts extends Contacts with RootConnector
 {
 
-  def insertContact(dashboardId:UUID, contact:Contact) = {
+  def insertContact(dashboardId:UUID, contact:Contact) =
     insert.
       value(_.dashboard_id, dashboardId).
       value(_.contact_of, contact.contactOf).
@@ -35,12 +34,10 @@ abstract class ConcreteContacts extends Contacts with RootConnector
       value(_.username, contact.username).
       future.
       map(_ => true)
-  }
 
-  def getByDashboardId(dashboard_id: UUID)  = {
+  def getByDashboardId(dashboard_id: UUID) =
     select.
       where(_.dashboard_id eqs dashboard_id).
       fetch()
-  }
 
 }

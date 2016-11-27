@@ -18,6 +18,9 @@ class FlickrAssistantDb(val keyspace:KeySpaceDef) extends Database(keyspace) wit
   object Contacts extends ConcreteContacts with keyspace.Connector
   object Photos extends ConcretePhotos with keyspace.Connector
   object PhotoFavourites extends ConcretePhotoFavourites with keyspace.Connector
+  object FavingUsers extends ConcreteFavingUsers with keyspace.Connector
+  object Relatives extends ConcreteRelatives with keyspace.Connector
+  object Timeline extends ConcreteTimeline with keyspace.Connector
 
   override def insertFavourite(dashboard_id: UUID, fav: Favourite)(implicit executor:ExecutionContext): Future[Boolean] = Favourites.insertFavourite(dashboard_id, fav)
 
@@ -42,5 +45,17 @@ class FlickrAssistantDb(val keyspace:KeySpaceDef) extends Database(keyspace) wit
   override def insertPhotoFavourite(dashboardId:UUID, photoFav: PhotoFavourite)(implicit executor:ExecutionContext): Future[Boolean] = PhotoFavourites.insertPhotoFavourite(dashboardId, photoFav)
 
   override def getPhotoFavouritesByDashboardId(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[PhotoFavourite]] = PhotoFavourites.getByDashboardId(dashboardId)
+
+  override def insertFavingUser(dashboardId: UUID, user: FavingUserStats)(implicit executor:ExecutionContext) = FavingUsers.insertFavingUser(dashboardId, user)
+
+  override def getFavingUsers(dashboardId: UUID)(implicit executor:ExecutionContext) = FavingUsers.getByDashboardId(dashboardId)
+
+  override def insertRelative(dashboardId: UUID, relative: Relative)(implicit executor: ExecutionContext): Future[Boolean] = Relatives.insertRelative(dashboardId, relative)
+
+  override def getRelatives(dashboardId: UUID)(implicit executor: ExecutionContext): Future[List[Relative]] = Relatives.getByDashboardId(dashboardId)
+
+  override def insertMonthlyStats(dashboardId: UUID, monthlyStats: MonthlyStats)(implicit executor: ExecutionContext): Future[Boolean] = Timeline.insertTimelineItem(dashboardId, monthlyStats)
+
+  override def getTimeline(dashboardId: UUID)(implicit executor: ExecutionContext): Future[List[MonthlyStats]] = Timeline.getByDashboardId(dashboardId)
 
 }

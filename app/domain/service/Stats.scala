@@ -5,6 +5,11 @@ import domain.entities._
 class Stats
 {
 
+  def photoSetStats(photos: Seq[PhotoExcerpt], topSize: Int = 10): PhotoSetStats = {
+    val top = getTopPhotosByPoints(photos, topSize)
+    PhotoSetStats(photos.map(_.points).sum / photos.size, top.map(_.points).sum / top.size)
+  }
+
   def favingUsers(photoFavs: Seq[PhotoFavourite], threshold: Int = 3): Seq[FavingUserStats] =
     photoFavs
       .groupBy(_.faved_by)

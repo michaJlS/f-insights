@@ -14,13 +14,25 @@ class Preloader extends Actor
   implicit val timeout = new Timeout(1, TimeUnit.SECONDS)
 
   override def receive: Receive = {
+    case msg: PreloadDashboard => {
+      for {
+        flickrClient <- context.actorSelection("../flickrclient").resolveOne
+        statistician <- context.actorSelection("../statistician").resolveOne
+      } {
+        flickrClient ! PreloadFavs(msg.token, msg.dashboardId, msg.nsid)
+        flickrClient ! PreloadContacts(msg.token, msg.dashboardId, msg.nsid)
+        flickrClient ! PreloadPhotos(msg.token, msg.dashboardId, msg.nsid)
+        statistician ! DoStats(msg.token, msg.dashboardId)
+      }
+
+    }
+
     case msg: PreloadPhotosFavs => {
       for {
         flickrClient <- context.actorSelection("../flickrclient").resolveOne
-        dbupdater <- context.actorSelection("../dbupdater").resolveOne
         p <- msg.photos
       } {
-        flickrClient ! PreloadPhotoFavs(dbupdater, msg.token, msg.dashboardId, msg.owner, p)
+        flickrClient ! PreloadPhotoFavs(msg.token, msg.dashboardId, msg.owner, p)
       }
     }
   }

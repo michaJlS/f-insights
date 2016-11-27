@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import akka.actor.{ActorSystem, Props}
 import controllers.actions._
-import controllers.actors.messages.PreloadPhotosFavs
+import controllers.actors.messages.{PreloadDashboard, PreloadPhotosFavs}
 import domain.entities.Dashboard
 import domain.service.{DashboardService, Stats}
 import infrastructure.cassandra.FlickrAssistantDb
@@ -19,13 +19,15 @@ import scalaz.Scalaz._
 import scalaz._
 
 @Singleton
-class Api @Inject() (system: ActorSystem, apiClient: WSClient, db:FlickrAssistantDb, repository: ApiRepository) extends Controller
+class Api @Inject() (system: ActorSystem, apiClient: WSClient, db: FlickrAssistantDb, repository: ApiRepository) extends Controller
 {
 
-  val context = defaultContext
-  val faManager = system.actorOf(Props(new actors.Manager(db, repository)), "famanager")
+
   val stats = new Stats
   val dashboardService = new DashboardService(db, stats)
+
+  val context = defaultContext
+  val faManager = system.actorOf(Props(new actors.Manager(db, repository, stats)), "famanager")
 
   import infrastructure.json.JsonWrites._
 
@@ -84,6 +86,13 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db:FlickrAssistan
       .getOrElse(InternalServerError(Json.toJson("Error during preparing stats of favs tags.")))
   } )
 
+  def timeline(nsid: String) = myActionTpl(nsid).async( implicit request => {
+    OptionT(dashboardService.getLastDashboard(nsid))
+      .flatMapF(dashboard => db.getTimeline(dashboard.id))
+      .map(timeline => Ok(Json.toJson(timeline)))
+      .getOrElse(InternalServerError(jsmsg("Error during loading monthly stats.")))
+  } )
+
   def monthlyStats(nsid: String) = myActionTpl(nsid).async( implicit request => {
     OptionT(dashboardService.getMonthlyStatsFromLastDashboard(nsid))
       .map(stats => Ok(Json.toJson(stats)))
@@ -95,6 +104,14 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db:FlickrAssistan
       .map(photos => Ok(Json.toJson(stats.popularTags(photos))))
       .getOrElse(InternalServerError(Json.toJson("Error during preparing stats of tags.")))
   } )
+
+
+  def statsFavingUsersFromDb(nsid: String) = myActionTpl(nsid).async( implicit request => {
+    OptionT(dashboardService.getLastDashboard(nsid))
+      .flatMapF(dashboard => db.getFavingUsers(dashboard.id))
+      .map(favusers => Ok(Json.toJson(favusers)))
+      .getOrElse(InternalServerError(jsmsg("Error during preparing stats of faving users")))
+  })
 
   def statsFavingUsers(nsid: String) = myActionTpl(nsid).async( implicit request => {
     val nonContactsOnly = request.getQueryString("non_contacts") == Some("true")
@@ -108,6 +125,22 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db:FlickrAssistan
       .map(favs => Ok(Json.toJson(stats.favingUsers(favs))))
       .getOrElse(InternalServerError(Json.toJson("Error during preparing stats of faving users.")))
   } )
+
+  def backgroundPreload(nsid: String) = myActionTpl(nsid).async( implicit request => {
+
+    dashboardService
+      .createEmptyDashboard(nsid)
+      .map {
+        case Some(dashboardId) => {
+          faManager ! PreloadDashboard(request.token, dashboardId, nsid)
+          Ok(jsmsg("ok"))
+        }
+        case _ => InternalServerError(jsmsg("Something went wrong."))
+      }
+
+  })
+
+  private def jsmsg(message: String) = Json.toJson(message)
 
   def preload(nsid:String) = myActionTpl(nsid).async( implicit request => {
     val futureFavs = repository.getAllUserPublicFavorites(nsid, request.token)
@@ -134,7 +167,6 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db:FlickrAssistan
         }
         case _ => InternalServerError(Json.toJson("Something went wrong."))
       })
-
   })
 
   private def userActionTpl(nsid:String) =

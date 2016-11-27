@@ -74,3 +74,8 @@ case class PhotoTagStats(tag: String, count: Int, avgPoints: Double, topAvgPoint
 case class FavingUserStats(user: String, username: String, realname: String, count: Int, firstFav: String, lastFav: String)
 
 case class MonthlyStats(month: String, uploaded: Int = 0, faved: Int = 0, gotFavs: Int = 0)
+
+case class Relative(nsid: String, username: String, realname: String, followed: Boolean, faved: Int, faving: Int,
+                    contacts: Int, photos: Int, avgPoints: Double, topAvgPoints: Double, topTags: Seq[String])
+
+case class PhotoSetStats(avgPoints: Double, topAvgPoints: Double)
