@@ -35,9 +35,10 @@ abstract class ConcreteContacts extends Contacts with RootConnector
       future.
       map(_ => true)
 
-  def getByDashboardId(dashboard_id: UUID) =
-    select.
-      where(_.dashboard_id eqs dashboard_id).
-      fetch()
+  def getByDashboardId(dashboard_id: UUID, of: String) =
+    select
+      .where(_.dashboard_id eqs dashboard_id)
+      .and(_.contact_of eqs of)
+      .fetch()
 
 }

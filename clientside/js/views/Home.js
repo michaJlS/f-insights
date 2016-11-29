@@ -9,6 +9,7 @@ FlickrAssistant.Views.Home = FlickrAssistant.BaseView.extend({
         this.setView("#timeline", new FlickrAssistant.Views.Timeline(), true)
         this.setView(".faving-users", new FlickrAssistant.Views.FavingUsers(), true)
         this.setView(".my-hot-tags", new FlickrAssistant.Views.MyHotTags(), true)
+        this.setView("#analytics", new FlickrAssistant.Views.Analytics(), true)
     },
     onFilterChange: function(from, to) {
         ['.faved-authors', '.faved-tags'].map(this.getView.bind(this)).forEach(function (vw) { vw.dateRangeChanged(from, to); });

@@ -144,4 +144,25 @@ object JsonWrites
     def writes(stats: Seq[FavingUserStats]) = JsArray(stats.map(Json.toJson(_)))
   }
 
+  implicit val relativeWrites = new Writes[Relative] {
+    def writes (r: Relative) = Json.obj(
+      "nsid" -> r.nsid,
+      "username" -> r.username,
+      "realname" -> r.realname,
+      "followed" -> r.followed,
+      "faved" -> r.faved,
+      "faving" -> r.faving,
+      "contacts" -> r.contacts,
+      "photos" -> r.photos,
+      "avg_points" -> r.avgPoints,
+      "top_avg_points" -> r.topAvgPoints,
+      "top_tags" -> r.topTags
+    )
+  }
+
+  implicit val relativesWrites = new Writes[List[Relative]] {
+    def writes(rs: List[Relative]) = JsArray(rs.map(Json.toJson(_)))
+  }
+
+
 }

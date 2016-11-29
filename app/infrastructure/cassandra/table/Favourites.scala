@@ -12,9 +12,9 @@ class Favourites extends CassandraTable[Favourites, Favourite]
   override lazy val tableName = "favourites"
 
   object dashboard_id extends UUIDColumn(this) with PrimaryKey[UUID]
+  object faved_by extends StringColumn(this) with ClusteringOrder[String]
   object photo_id extends StringColumn(this) with ClusteringOrder[String]
   object date_faved extends StringColumn(this)
-  object faved_by extends StringColumn(this)
   object title extends StringColumn(this)
   object owner extends StringColumn(this)
   object owner_name extends StringColumn(this)
@@ -58,10 +58,11 @@ abstract class ConcreteFavourites extends Favourites with RootConnector
       map(_ => true)
   }
 
-  def getByDashboardId(dashboard_id: UUID)  = {
-    select.
-      where(_.dashboard_id eqs dashboard_id).
-      fetch()
+  def getByDashboardId(dashboard_id: UUID, of: String)  = {
+    select
+      .where(_.dashboard_id eqs dashboard_id)
+      .and(_.faved_by eqs of)
+      .fetch()
   }
 
 

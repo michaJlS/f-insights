@@ -58,20 +58,20 @@ class DashboardService(appRepository: AppRepository, stats: Stats) {
       map(_ => Some(dashboard.id))
   }
 
-  def getFavouritesFromLastDashboard(nsid: String)(implicit executor:ExecutionContext): Future[Option[List[Favourite]]] =
+  def getFavourites(nsid: String)(implicit executor:ExecutionContext): Future[Option[List[Favourite]]] =
     OptionT(getLastDashboard(nsid))
-      .flatMapF(dashboard => appRepository.getFavouritesByDashboardId(dashboard.id))
+      .flatMapF(dashboard => appRepository.getFavouritesByDashboardId(dashboard.id, nsid))
       .run
 
 
   def getUserPhotosFromLastDashboard(nsid: String)(implicit executor:ExecutionContext): Future[Option[List[PhotoExcerpt]]] =
     OptionT(getLastDashboard(nsid))
-      .flatMapF(dashboard => appRepository.getPhotosByDashboardId(dashboard.id))
+      .flatMapF(dashboard => appRepository.getPhotosByDashboardId(dashboard.id, nsid))
       .run
 
-  def getContactsFromLastDashboard(nsid: String)(implicit executor:ExecutionContext): Future[Option[List[Contact]]] =
+  def getContacts(nsid: String)(implicit executor:ExecutionContext): Future[Option[List[Contact]]] =
     OptionT(getLastDashboard(nsid))
-      .flatMapF(dashboard => appRepository.getContactsByDashboardId(dashboard.id))
+      .flatMapF(dashboard => appRepository.getContactsByDashboardId(dashboard.id, nsid))
       .run
 
   def getReceivedFavourites(nsid: String)(implicit ec: ExecutionContext): Future[Option[List[PhotoFavourite]]] = {
@@ -82,7 +82,7 @@ class DashboardService(appRepository: AppRepository, stats: Stats) {
 
   def getReceivedFavouritesForNonCotacts(nsid: String)(implicit ec: ExecutionContext): Future[Option[List[PhotoFavourite]]] = {
     val favsFuture = OptionT(getReceivedFavourites(nsid))
-    val contactsFuture = OptionT(getContactsFromLastDashboard(nsid))
+    val contactsFuture = OptionT(getContacts(nsid))
 
     (for {
       favs <- favsFuture
@@ -92,9 +92,9 @@ class DashboardService(appRepository: AppRepository, stats: Stats) {
       .run
   }
 
-  def getFavourtiesForNonCotactsFromLastDashboard(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Favourite]]] = {
-    val favsFuture = OptionT(getFavouritesFromLastDashboard(nsid))
-    val contactsFuture = OptionT(getContactsFromLastDashboard(nsid))
+  def getFavourtiesForNonCotacts(nsid:String)(implicit executor:ExecutionContext): Future[Option[List[Favourite]]] = {
+    val favsFuture = OptionT(getFavourites(nsid))
+    val contactsFuture = OptionT(getContacts(nsid))
 
     (for {
       favs <- favsFuture
@@ -104,8 +104,8 @@ class DashboardService(appRepository: AppRepository, stats: Stats) {
       .run
   }
 
-  def getMonthlyStatsFromLastDashboard(nsid: String)(implicit executor:ExecutionContext): Future[Option[Seq[MonthlyStats]]] = {
-    val favsFuture = OptionT(getFavouritesFromLastDashboard(nsid))
+  def getMonthlyStats(nsid: String)(implicit executor:ExecutionContext): Future[Option[Seq[MonthlyStats]]] = {
+    val favsFuture = OptionT(getFavourites(nsid))
     val photosFuture = OptionT(getUserPhotosFromLastDashboard(nsid))
     val gotFavsFuture = OptionT(getReceivedFavourites(nsid))
 
@@ -116,6 +116,11 @@ class DashboardService(appRepository: AppRepository, stats: Stats) {
     } yield stats.monthlyStats(photos, favs, gotFavs))
       .run
   }
+
+  def getRelatives(nsid: String)(implicit executor:ExecutionContext): Future[Option[List[Relative]]] =
+    OptionT(getLastDashboard(nsid))
+      .flatMapF(d => appRepository.getRelatives(d.id))
+      .run
 
   def filterDateRange(favs: List[Favourite], from: Option[String], to: Option[String]) = (from, to) match {
       case (Some(f), Some(t)) => favs.filter(fav => fav.date_faved.compare(t) < 1 && fav.date_faved.compare(f) > -1)

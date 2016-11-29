@@ -24,7 +24,7 @@ trait AppRepository
   /** @throws Exception */
   def insertFavourties(dashboardId: UUID, favs: Seq[Favourite])(implicit executor:ExecutionContext) = Future.sequence(favs.map(insertFavourite(dashboardId, _))).map(_ => true)
 
-  def getFavouritesByDashboardId(dashboard_id: UUID)(implicit executor:ExecutionContext): Future[List[Favourite]]
+  def getFavouritesByDashboardId(dashboard_id: UUID, of: String)(implicit executor:ExecutionContext): Future[List[Favourite]]
 
   def insertUserDetail(detail: AppUserDetail)(implicit executor:ExecutionContext):Future[Boolean]
 
@@ -34,13 +34,13 @@ trait AppRepository
 
   def insertContacts(dashboardId:UUID, contacts:Seq[Contact])(implicit executor:ExecutionContext) = Future.sequence(contacts.map(insertContact(dashboardId, _))).map(_ => true)
 
-  def getContactsByDashboardId(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[Contact]]
+  def getContactsByDashboardId(dashboardId: UUID, of: String)(implicit executor:ExecutionContext): Future[List[Contact]]
 
   def insertUserPhoto(dashboardId:UUID, photo: PhotoExcerpt)(implicit executor:ExecutionContext): Future[Boolean]
 
   def insertUserPhotos(dashboardId:UUID, photos: Seq[PhotoExcerpt])(implicit executor:ExecutionContext) = Future.sequence(photos.map(insertUserPhoto(dashboardId, _))).map(_ => true)
 
-  def getPhotosByDashboardId(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[PhotoExcerpt]]
+  def getPhotosByDashboardId(dashboardId: UUID, author: String)(implicit executor:ExecutionContext): Future[List[PhotoExcerpt]]
 
   def insertPhotoFavourite(dashboardId:UUID, photoFav: PhotoFavourite)(implicit executor:ExecutionContext): Future[Boolean]
 

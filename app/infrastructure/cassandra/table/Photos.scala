@@ -11,9 +11,9 @@ class Photos extends CassandraTable[Photos, PhotoExcerpt] {
   override lazy val tableName = "photos"
 
   object dashboard_id extends UUIDColumn(this) with PrimaryKey[UUID]
+  object owner extends StringColumn(this) with ClusteringOrder[String]
   object photo_id extends StringColumn(this) with ClusteringOrder[String]
   object title extends StringColumn(this)
-  object owner extends StringColumn(this)
   object owner_name extends StringColumn(this)
   object date_upload extends StringColumn(this)
   object date_taken extends StringColumn(this)
@@ -52,9 +52,10 @@ abstract class ConcretePhotos extends Photos with RootConnector {
       map(_ => true)
   }
 
-  def getByDashboardId(dashboard_id: UUID) =
-    select.
-      where(_.dashboard_id eqs dashboard_id).
-      fetch()
+  def getByDashboardId(dashboard_id: UUID, author: String) =
+    select
+      .where(_.dashboard_id eqs dashboard_id)
+      .and(_.owner eqs author)
+      .fetch()
 
 }

@@ -24,7 +24,7 @@ class FlickrAssistantDb(val keyspace:KeySpaceDef) extends Database(keyspace) wit
 
   override def insertFavourite(dashboard_id: UUID, fav: Favourite)(implicit executor:ExecutionContext): Future[Boolean] = Favourites.insertFavourite(dashboard_id, fav)
 
-  override def getFavouritesByDashboardId(dashboard_id: UUID)(implicit executor:ExecutionContext): Future[List[Favourite]] = Favourites.getByDashboardId(dashboard_id)
+  override def getFavouritesByDashboardId(dashboard_id: UUID, of: String)(implicit executor:ExecutionContext): Future[List[Favourite]] = Favourites.getByDashboardId(dashboard_id, of)
 
   override def insertUserDetail(detail: AppUserDetail)(implicit executor:ExecutionContext): Future[Boolean] = AppUserDetails.insertDetail(detail)
 
@@ -36,11 +36,11 @@ class FlickrAssistantDb(val keyspace:KeySpaceDef) extends Database(keyspace) wit
 
   override def insertContact(dashboardId: UUID, contact: Contact)(implicit executor: ExecutionContext): Future[Boolean] = Contacts.insertContact(dashboardId, contact)
 
-  override def getContactsByDashboardId(dashboardId: UUID)(implicit executor: ExecutionContext): Future[List[Contact]] = Contacts.getByDashboardId(dashboardId)
+  override def getContactsByDashboardId(dashboardId: UUID, of: String)(implicit executor: ExecutionContext): Future[List[Contact]] = Contacts.getByDashboardId(dashboardId, of)
 
   override def insertUserPhoto(dashboardId:UUID, photo: PhotoExcerpt)(implicit executor:ExecutionContext): Future[Boolean] = Photos.insertPhoto(dashboardId, photo)
 
-  override def getPhotosByDashboardId(dashboardId: UUID)(implicit executor:ExecutionContext): Future[List[PhotoExcerpt]] = Photos.getByDashboardId(dashboardId)
+  override def getPhotosByDashboardId(dashboardId: UUID, author: String)(implicit executor:ExecutionContext): Future[List[PhotoExcerpt]] = Photos.getByDashboardId(dashboardId, author)
 
   override def insertPhotoFavourite(dashboardId:UUID, photoFav: PhotoFavourite)(implicit executor:ExecutionContext): Future[Boolean] = PhotoFavourites.insertPhotoFavourite(dashboardId, photoFav)
 

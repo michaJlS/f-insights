@@ -51,7 +51,7 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db: FlickrAssista
 
   def userGetContacts(nsid: String) = myActionTpl(nsid).async(implicit request => {
     dashboardService.
-      getContactsFromLastDashboard(nsid).
+      getContacts(nsid).
       map {
         case Some(contacts) => Ok(Json.toJson(contacts))
         case _ => InternalServerError(Json.toJson("Error during fetching contacts."))
@@ -63,7 +63,7 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db: FlickrAssista
     val fromTimestamp = request.getQueryString("from_timestamp").filter(_.length>0)
     val toTimestamp = request.getQueryString("to_timestamp").filter(_.length>0)
 
-    OptionT(dashboardService.getFavouritesFromLastDashboard(nsid))
+    OptionT(dashboardService.getFavourites(nsid))
       .map{dashboardService.filterDateRange(_, fromTimestamp, toTimestamp)}
       .map(favs => Ok(Json.toJson(Some(stats.favsTagsStats(favs, threshold)))))
       .getOrElse(InternalServerError(Json.toJson("Error during preparing stats of favs tags")))
@@ -77,9 +77,9 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db: FlickrAssista
 
     OptionT {
       if (nonContactsOnly)
-        dashboardService.getFavourtiesForNonCotactsFromLastDashboard(nsid)
+        dashboardService.getFavourtiesForNonCotacts(nsid)
       else
-        dashboardService.getFavouritesFromLastDashboard(nsid)
+        dashboardService.getFavourites(nsid)
     }
       .map(dashboardService.filterDateRange(_, fromTimestamp, toTimestamp))
       .map(favs => Ok(Json.toJson(stats.favsOwnersStats(favs, threshold))))
@@ -94,7 +94,7 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db: FlickrAssista
   } )
 
   def monthlyStats(nsid: String) = myActionTpl(nsid).async( implicit request => {
-    OptionT(dashboardService.getMonthlyStatsFromLastDashboard(nsid))
+    OptionT(dashboardService.getMonthlyStats(nsid))
       .map(stats => Ok(Json.toJson(stats)))
       .getOrElse(InternalServerError(Json.toJson("Error during preparing monthly stats.")))
   } )
@@ -127,7 +127,6 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db: FlickrAssista
   } )
 
   def backgroundPreload(nsid: String) = myActionTpl(nsid).async( implicit request => {
-
     dashboardService
       .createEmptyDashboard(nsid)
       .map {
@@ -167,6 +166,12 @@ class Api @Inject() (system: ActorSystem, apiClient: WSClient, db: FlickrAssista
         }
         case _ => InternalServerError(Json.toJson("Something went wrong."))
       })
+  })
+
+  def relatives(nsid: String) = myActionTpl(nsid).async( implicit request => {
+    OptionT(dashboardService.getRelatives(nsid))
+      .map(rs => Ok(Json.toJson(rs)))
+      .getOrElse(InternalServerError(jsmsg("Something went wrong while loading relatives")))
   })
 
   private def userActionTpl(nsid:String) =
