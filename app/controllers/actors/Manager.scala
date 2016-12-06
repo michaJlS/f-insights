@@ -11,6 +11,7 @@ class Manager(appRepo: AppRepository, apiRepo: ApiRepository, stats: Stats) exte
   val preloaderProps = Props(classOf[Preloader])
   val flickrClientProps = Props(new FlickrClient(apiRepo))
   val statisticianProps = Props(new Statistician(stats))
+  val gatherProps = Props(new Gather())
 
   override def preStart(): Unit = {
     super.preStart()
@@ -18,6 +19,7 @@ class Manager(appRepo: AppRepository, apiRepo: ApiRepository, stats: Stats) exte
     context.actorOf(preloaderProps, name = "preloader")
     context.actorOf(flickrClientProps, name = "flickrclient")
     context.actorOf(statisticianProps, name = "statistician")
+    context.actorOf(gatherProps, name = "gather")
   }
 
   override def receive = {

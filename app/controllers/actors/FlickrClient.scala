@@ -1,22 +1,19 @@
 package controllers.actors
-import java.util.concurrent.TimeUnit
 
 import akka.actor.{Actor, ActorRef, Props}
-import akka.util.Timeout
-import infrastructure.flickr.ApiRepository
-
 import scala.collection.mutable.{Queue => MQueue}
-import messages._
-
 import scalaz._
 import Scalaz._
+
+import infrastructure.flickr.ApiRepository
+import messages._
+
 
 class FlickrClient(apiRepo: ApiRepository, parallelism: Int = 4) extends Actor{
 
   import FlickrClient._
 
   val availableWorkers: MQueue[ActorRef] = MQueue.empty
-
   val workBuffer: MQueue[PreloadTask] = MQueue.empty
 
   override def receive = {
@@ -49,11 +46,8 @@ class FlickrClient(apiRepo: ApiRepository, parallelism: Int = 4) extends Actor{
 }
 
 object FlickrClient {
-  implicit val timeout = new Timeout(1, TimeUnit.SECONDS)
 
-  class Worker(repo: ApiRepository) extends Actor {
-
-    import play.api.libs.concurrent.Execution.Implicits._
+  class Worker(repo: ApiRepository) extends Actor with BaseActor {
 
     override def receive = {
       case msg: PreloadPhotoFavs =>
