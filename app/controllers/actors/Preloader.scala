@@ -18,7 +18,9 @@ class Preloader extends Actor
       for {
         flickrClient <- context.actorSelection("../flickrclient").resolveOne
         statistician <- context.actorSelection("../statistician").resolveOne
+        gather <- context.actorSelection("../gather").resolveOne
       } {
+        gather ! GatherData(msg.token, msg.dashboardId)
         flickrClient ! PreloadFavs(msg.token, msg.dashboardId, msg.nsid)
         flickrClient ! PreloadContacts(msg.token, msg.dashboardId, msg.nsid)
         flickrClient ! PreloadPhotos(msg.token, msg.dashboardId, msg.nsid)

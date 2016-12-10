@@ -13,10 +13,11 @@
     This configures the log level to log at for a package and its children packages.
   -->
   <logger name="play" level="INFO" />
-  <logger name="application" level="DEBUG" />
-  <logger name="akka" level="DEBUG" />
+  <logger name="application" level="INFO" />
+  <logger name="akka" level="INFO" />
+  <logger name="fa-actors" level="INFO" />
 
-  <root level="ERROR">
+  <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
 

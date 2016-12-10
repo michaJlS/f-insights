@@ -25,7 +25,7 @@ trait Repository
 
   def getAllUserPublicFavoritesSequentially(nsid: String, token: UserToken, favedBefore: Option[String] = None, favedAfter: Option[String] = None)
                                            (implicit executor:ExecutionContext): Future[Option[Seq[Favourite]]] =
-    loadSequentialyOnlyItems((page: Int) => getUserPublicFavorites(nsid, token, page, 500, favedBefore, favedAfter))
+    loadSequentialyOnlyItems((page: Int) => getUserPublicFavorites(nsid, token, page, 500, favedBefore, favedAfter), Some(10))
 
   def getAllUserPublicFavorites(nsid: String, token: UserToken)(implicit ec: ExecutionContext): Future[Option[Seq[Favourite]]] =
     loadParallely((page: Int) => getUserPublicFavorites(nsid, token, page, 500))
@@ -34,7 +34,7 @@ trait Repository
     loadParallely((page: Int) => getUserPublicContacts(nsid, token, page, 1000))
 
   def getAllUserPublicContactsSequentially(nsid: String, token: UserToken)(implicit executor: ExecutionContext): Future[Option[Seq[Contact]]] =
-    loadSequentialyOnlyItems((page: Int) => getUserPublicContacts(nsid, token, page, 1000))
+    loadSequentialyOnlyItems((page: Int) => getUserPublicContacts(nsid, token, page, 1000), Some(10))
 
 
   def getUserPublicContactsSequentially(nsid: String, token: UserToken, limitPages: Int)(implicit executor: ExecutionContext): Future[Option[ResultInfo[Contact]]] =
@@ -44,7 +44,7 @@ trait Repository
     loadParallely((page: Int) => getUserPhotos(nsid, token, page, 500))
 
   def getAllUserPhotosSequentially(nsid: String, token: UserToken)(implicit executor: ExecutionContext): Future[Option[Seq[PhotoExcerpt]]] =
-    loadSequentialyOnlyItems((page: Int) => getUserPhotos(nsid, token, page, 500))
+    loadSequentialyOnlyItems((page: Int) => getUserPhotos(nsid, token, page, 500), Some(10))
 
   def getUserPhotosSequentially(nsid: String, token: UserToken, limitPages: Int)(implicit executor: ExecutionContext): Future[Option[ResultInfo[PhotoExcerpt]]] =
     loadSequentialy((page: Int) => getUserPhotos(nsid, token, page, 500))
@@ -54,7 +54,7 @@ trait Repository
 
   def getAllPhotoFavs(photoId: String, owner: String, token: UserToken)
                      (implicit ec: ExecutionContext): Future[Option[Seq[PhotoFavourite]]] =
-    loadSequentialyOnlyItems((page: Int) => getPhotoFavs(photoId, owner, token, page, 50))
+    loadSequentialyOnlyItems((page: Int) => getPhotoFavs(photoId, owner, token, page, 50), Some(10))
 
   protected def loadParallely[T](f: (Int => Future[Option[(CollectionInfo, Seq[T])]]))
                                (implicit ec: ExecutionContext): Future[Option[Seq[T]]] =

@@ -137,25 +137,27 @@ class ResponseParser {
   def getFavouritesWithCollectionInfo(json: JsValue, favFor: String = ""): Option[(CollectionInfo, Seq[Favourite])] =
     for {
       info <- getPhotosCollectionInfo(json)
-      favs <- getFavourites(json, favFor)
+      favs <- getFavourites(json, favFor).orElse(maybeEmpty(info))
     } yield (info, favs)
 
   def getContactsWithCollectionInfo(json: JsValue, contactsOf: String = ""): Option[(CollectionInfo, Seq[Contact])] =
     for {
       info <- getContactsCollectionInfo(json)
-      contacts <- getContacts(json, contactsOf)
+      contacts <- getContacts(json, contactsOf).orElse(maybeEmpty(info))
     } yield (info, contacts)
 
   def getPhotosWithCollectionInfo(json: JsValue): Option[(CollectionInfo, Seq[PhotoExcerpt])] =
     for {
       info <- getPhotosCollectionInfo(json)
-      photos <- getPhotos(json)
+      photos <- getPhotos(json).orElse(maybeEmpty(info))
     } yield (info, photos)
 
   def getPhotoFavouritesWithCollectionInfo(json: JsValue, owner: String): Option[(CollectionInfo, Seq[PhotoFavourite])] =
     for {
       info <- getPhotoFavouritesCollectionInfo(json)
-      photos <- getPhotoFavourites(json, owner)
+      photos <- getPhotoFavourites(json, owner).orElse(maybeEmpty(info))
     } yield (info, photos)
+
+  private def maybeEmpty[T](info: CollectionInfo) = if (info.total == 0) Some(Seq.empty[T]) else None
 
 }

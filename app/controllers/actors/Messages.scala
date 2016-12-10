@@ -8,10 +8,10 @@ case class PreloadPhotosFavs(token: UserToken, dashboardId: UUID, owner: String,
 
 sealed trait PreloadTask
 
-case class PreloadPhotoFavs(token: UserToken, dashboardId: UUID, owner: String, photo: String, retry: Int = 0) extends PreloadTask
-case class PreloadPhotos(token: UserToken, dashboardId: UUID, nsid: String, retry: Int = 0) extends PreloadTask
-case class PreloadContacts(token: UserToken, dashboardId: UUID, nsid: String, retry: Int = 0) extends PreloadTask
-case class PreloadFavs(token: UserToken, dashboardId: UUID, nsid: String, retry: Int = 0) extends PreloadTask
+case class PreloadPhotoFavs(token: UserToken, dashboardId: UUID, owner: String, photo: String) extends PreloadTask
+case class PreloadPhotos(token: UserToken, dashboardId: UUID, nsid: String) extends PreloadTask
+case class PreloadContacts(token: UserToken, dashboardId: UUID, nsid: String) extends PreloadTask
+case class PreloadFavs(token: UserToken, dashboardId: UUID, nsid: String) extends PreloadTask
 
 case class DoStats(token: UserToken, dashboardId: UUID)
 
@@ -29,8 +29,8 @@ case class DoRelativeStats(token: UserToken, dashboardId: UUID, nsid: String, re
                            contacts: Seq[Contact], totalContacts: Int,
                            photos: Seq[PhotoExcerpt], totalPhotos: Int)
 
-case class PreloadRelativePhotos(token: UserToken, dashboardId: UUID, nsid: String, retry: Int = 0) extends PreloadTask
-case class PreloadRelativeContacts(token: UserToken, dashboardId: UUID, nsid: String, retry: Int = 0) extends PreloadTask
+case class PreloadRelativePhotos(token: UserToken, dashboardId: UUID, nsid: String) extends PreloadTask
+case class PreloadRelativeContacts(token: UserToken, dashboardId: UUID, nsid: String) extends PreloadTask
 
 case class GatherData(token: UserToken, dashboardId: UUID) extends BasicDashbaordInfo
 

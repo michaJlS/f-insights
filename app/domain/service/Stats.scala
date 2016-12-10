@@ -83,9 +83,13 @@ class Stats
 
   private def getTopPhotosByPoints(photos: Seq[PhotoExcerpt], n: Int = 0): Seq[PhotoExcerpt] = photos.sortBy(_.points * -1).slice(0, n)
 
-  private def avgPoints(photos: Seq[PhotoExcerpt]): Double = photos.foldLeft[Double](0.0)({
-    case (total, photo) => total + photo.points
-  }) / photos.size
+  private def avgPoints(photos: Seq[PhotoExcerpt]): Double =
+    if (photos.size > 0)
+      photos.foldLeft[Double](0.0)({
+        case (total, photo) => total + photo.points
+      }) / photos.size
+    else
+      0
 
   private def byMonth[T](s: Seq[T], f:(T => String)): Map[String, Int] = s.map(f).groupBy(t => t).mapValues(_.size)
 

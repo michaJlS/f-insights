@@ -6,6 +6,7 @@ import play.api.libs.oauth.{ConsumerKey, OAuthCalculator, RequestToken}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse, WSSignatureCalculator}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 
 class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey)
 {
@@ -81,6 +82,7 @@ class ApiClient (url: String, apiClient: WSClient, consumerKey: ConsumerKey)
     apiClient
       .url(url)
       .withQueryString("format" -> "json",  "nojsoncallback" -> "1", "api_key" -> consumerKey.key)
+      .withRequestTimeout(30.seconds)
 
   private def getJson(response: WSResponse)
                      (implicit executor:ExecutionContext): Option[JsValue] =

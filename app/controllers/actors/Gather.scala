@@ -54,6 +54,7 @@ object Gather {
     private def dashboardLoaded(id: UUID): Boolean = dashboards.get(id).map(_.isComplete).getOrElse(false)
 
     private def doUserStats(id: UUID): Unit = {
+      logger.info(s"Loaded dashboard $id , loading stats")
       for {
         dashboard <- dashboards.get(id)
         msg <- dashboard.asMessage
@@ -77,10 +78,11 @@ object Gather {
     private def update[M <: RelativesInfo](m: M)(f: (RelativeData => RelativeData)): Unit = for {
       d <- relatives.get(m.dashboardId)
       rd <- d.get(m.nsid)
+      newRd = f(rd)
     } {
-      d += (rd.nsid -> f(rd))
-      if (rd.isComplete)
-        doRelativeStats(rd)
+      d += (rd.nsid -> newRd)
+      if (newRd.isComplete)
+        doRelativeStats(newRd)
     }
 
     private def doRelativeStats(rd: RelativeData): Unit = {
@@ -89,29 +91,39 @@ object Gather {
       }
       for {d <- relatives.get(rd.dashboardId)} {
         d -= rd.nsid
+        if (d.size % 50 == 0)
+          logger.info(s"# of relatives to collect: ${relatives.size}")
       }
     }
 
     private def initRelativesForDashboard(msg: DoDashboardStats): Unit = {
-      val favedByRelatives = msg.favs.groupBy(_.faved_by).mapValues(_.toSeq)
-      val favingByRelative = msg.photoFavourites.values.flatten.groupBy(_.owner).mapValues(_.toSeq)
+      val favedByRelatives = msg.favs.groupBy(_.photo.owner).mapValues(_.toSeq)
+      val favingByRelative = msg.photoFavourites.values.flatten.groupBy(_.faved_by).mapValues(_.toSeq)
       val contacts = msg.contacts.map(c => (c.nsid -> c)).toMap
-      val nsids = contacts.keys ++ favingByRelative.filter(_._2.size > 2).keys ++ favedByRelatives.filter(_._2.size > 2).keys
+
+      val r1 = favingByRelative.filter(_._2.size > 2).keys
+      val r2 = favedByRelatives.filter(_._2.size > 2).keys
+
+      val nsids = (contacts.keys ++ r1 ++ r2).toSet
       val buff: MHashMap[String, RelativeData] = MHashMap.empty
       relatives += (msg.dashboardId -> buff)
+
+      logger.info(s"To load: ${nsids.size}, in that: ${contacts.size} contacts, ${r1.size} faving and ${r2.size} faved.")
 
       nsids.foreach(nsid => {
         val faved: Seq[Favourite] = favedByRelatives.getOrElse(nsid, Seq.empty)
         val faving: Seq[PhotoFavourite] = favingByRelative.getOrElse(nsid, Seq.empty)
         val rd = RelativeData(msg.dashboardId, msg.token, nsid, faved, faving, contacts.get(nsid))
         buff += (rd.nsid -> rd)
-        context.actorSelection("../../flickrclient").resolveOne.map(fc => {
-          fc ! PreloadRelativeContacts(rd.token, rd.dashboardId, nsid)
-          fc ! PreloadRelativePhotos(rd.token, rd.dashboardId, nsid)
-        })
       })
-    }
 
+      context.actorSelection("../../flickrclient").resolveOne.map(fc =>
+        buff.values.foreach(rd => {
+          fc ! PreloadRelativeContacts(rd.token, rd.dashboardId, rd.nsid)
+          fc ! PreloadRelativePhotos(rd.token, rd.dashboardId, rd.nsid)
+        })
+      )
+    }
   }
 
   case class DashboardData(id: UUID, favs: Option[Seq[Favourite]] = None, contacts: Option[Seq[Contact]] = None,
