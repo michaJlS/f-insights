@@ -1,3 +1,18 @@
 <h3>Analytics</h3>
+<div id="relativeschart-container">
+    <div id="relativeschart"></div>
+    <div class="legend">
+        <ul>
+            <li class="desc"><span>Colours:</span></li>
+            <li style="color: {{mutual_color}}"><span>Mutual favs</span></li>
+            <li style="color: {{ifaved_color}}"><span>I faved</span></li>
+            <li style="color: {{gotfav_color}}"><span>Got fav</span></li>
 
-<div id="relativeschart"></div>
+            <li class="size-selector">
+                Size by # of favs:
+                <a href="#" class="active" data-sizeby="mutual">mutual</a> |
+                <a href="#" data-sizeby="ifaved">I faved</a> |
+                <a href="#" data-sizeby="gotfav">Got fav</a></li>
+        </ul>
+    </div>
+</div>
