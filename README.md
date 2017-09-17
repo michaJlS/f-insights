@@ -6,6 +6,8 @@ Web app presenting statistics of your activity on flickr.
 > in this project in future.
 
 
+![f insights home page screenshot](docs/fa-home.png) ![f insights anlytics page screenshot](docs/fa-analytics.png)
+
 ## Setup 
 ### Requirements
 * You will need to have preinstalled Java, Scala, SBT, nodejs, npm and docker.
