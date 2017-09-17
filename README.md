@@ -1,5 +1,5 @@
 
-# Flickr Assistant
+# f insights
 Web app presenting statistics of your activity on flickr.
 
 > This is my playground for learning Scala, Play Framework, Akka & Cassandra or whatever else I will decide to include
