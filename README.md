@@ -3,7 +3,7 @@
 Web app presenting statistics of your activity on flickr.
 
 > This is my playground for learning Scala, Play Framework, Akka & Cassandra or whatever else I will decide to include
-> in this project in future. You can find more information about the project on [my blog](http://michal.sznurawa.pl/f-insights/)
+> in this project in future. You can find more information about the project on [my blog](http://michal.sznurawa.pl/f-insights/).
 
 
 ![f insights home page screenshot](docs/fa-home.png) ![f insights anlytics page screenshot](docs/fa-analytics.png)
