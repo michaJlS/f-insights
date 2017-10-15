@@ -17,8 +17,9 @@ Web app presenting statistics of your activity on flickr.
 ### Frontend
 Start from building the UI:
 ```
+sudo npm install -g npx
 npm install
-grunt
+npx grunt
 ```
 ### DB
 The second step is to setup the DB.
