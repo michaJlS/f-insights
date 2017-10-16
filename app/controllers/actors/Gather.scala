@@ -92,7 +92,7 @@ object Gather {
       for {d <- relatives.get(rd.dashboardId)} {
         d -= rd.nsid
         if (d.size % 50 == 0)
-          logger.info(s"# of relatives to collect: ${relatives.size}")
+          logger.info(s"# of relatives to collect: ${d.size}")
       }
     }
 
